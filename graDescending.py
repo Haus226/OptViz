@@ -8,99 +8,25 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 def GradientDescending(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-10):
-    cur = init.copy()
-    _, vars = f(**cur)
+    _, vars = f(**init)
     _.backward()
-    coords = np.array([[cur[k] for k in cur]])
+    coords = np.array([[var.v for var in vars.values()]])
     evaluated = np.array([_.v])
     prev_f = _.v
-    prev_grad_norm = np.linalg.norm(np.array([vars[k].grad for k in cur]))
+    prev_grad_norm = np.linalg.norm(np.array([var.grad for var in vars.values()]))
     for cnt in range(iter):
-        for k in cur:
-            cur[k] = cur[k] - lr * vars[k].grad
-            vars[k].v = cur[k]
+        for var in vars.values():
+            var.v -= lr * var.grad
         _.forward()
-        _.backward()
         if (np.abs(prev_f - _.v) < tol):
             print(f"Terminate by f_value after {cnt} iterations")
             break
-        grad_norm = np.linalg.norm(np.array([vars[k].grad for k in cur]))
-        if np.abs(grad_norm - prev_grad_norm) < tol:
-            print(f"Terminate by gradient after {cnt} iterations")
-            break
-        coords = np.append(coords, np.array([[cur[k] for k in cur]]), axis=0)
-        evaluated = np.append(evaluated, np.array([_.v]), axis=0)
-        prev_f = _.v
-        prev_grad_norm = grad_norm
-    # print(coords)
-    # print(evaluated)
-    return coords, evaluated
-
-def Adam(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-10, beta1=0.9, beta2=0.999, epsilon=1e-8):
-    cur = init.copy()
-    m = np.zeros_like(list(cur), dtype=float)
-    v = np.zeros_like(list(cur), dtype=float)
-    grad = np.empty_like(list(cur), dtype=float)
-    _, vars = f(**cur)
-    _.backward()
-    coords = np.array([[cur[k] for k in cur]])
-    evaluated = np.array([_.v])
-    prev_f = _.v
-    prev_grad_norm = np.linalg.norm(np.array([vars[k].grad for k in cur]))
-    for cnt in range(iter):
-        for idx, k in enumerate(vars):
-            grad[idx] = vars[k].grad
-        m = beta1 * m + (1 - beta1) * grad
-        v = beta2 * v + (1 - beta2) * np.square(grad)
-        m_hat = m / (1 - np.power(beta1, cnt + 1))
-        v_hat = v / (1 - np.power(beta2, cnt + 1))
-        for idx, k in enumerate(cur):
-            cur[k] = cur[k] - lr * m_hat[idx] / (np.sqrt(v_hat[idx]) + epsilon)
-            vars[k].v = cur[k]
-        _.forward()
         _.backward()
-        if (np.abs(prev_f - _.v) < tol):
-            print(f"Terminate by f_value after {cnt} iterations")
-            break
-        grad_norm = np.linalg.norm(np.array([vars[k].grad for k in cur]))
+        grad_norm = np.linalg.norm(np.array([var.grad for var in vars.values()]))
         if np.abs(grad_norm - prev_grad_norm) < tol:
             print(f"Terminate by gradient after {cnt} iterations")
             break
-        coords = np.append(coords, np.array([[cur[k] for k in cur]]), axis=0)
-        evaluated = np.append(evaluated, np.array([_.v]), axis=0)
-        prev_f = _.v
-        prev_grad_norm = grad_norm
-    # print(coords)
-    # print(evaluated)
-    return coords, evaluated
-
-def RMSprop(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-10, beta=0.9, epsilon=1e-8):
-    cur = init.copy()
-    v = np.zeros_like(list(cur), dtype=float)
-    grad = np.empty_like(list(cur), dtype=float)
-    _, vars = f(**cur)
-    _.backward()
-    coords = np.array([[cur[k] for k in cur]])
-    evaluated = np.array([_.v])
-    prev_f = _.v
-    prev_grad_norm = np.linalg.norm(np.array([vars[k].grad for k in cur]))
-    for cnt in range(iter):
-        for idx, k in enumerate(vars):
-            grad[idx] = vars[k].grad
-        v = beta * v + (1 - beta) * np.square(grad)
-        for idx, k in enumerate(cur):
-            cur[k] = cur[k] - lr * grad[idx] / (np.sqrt(v[idx]) + epsilon)
-            vars[k].v = cur[k]
-        _.forward()
-        _.backward()
-        if (np.abs(prev_f - _.v) < tol):
-            print(f"Terminate by f_value after {cnt} iterations")
-            break
-        grad_norm = np.linalg.norm(np.array([vars[k].grad for k in cur]))
-        if np.abs(grad_norm - prev_grad_norm) < tol:
-            print(f"Terminate by gradient after {cnt} iterations")
-            break
-        coords = np.append(coords, np.array([[cur[k] for k in cur]]), axis=0)
+        coords = np.append(coords, np.array([[var.v for var in vars.values()]]), axis=0)
         evaluated = np.append(evaluated, np.array([_.v]), axis=0)
         prev_f = _.v
         prev_grad_norm = grad_norm
@@ -109,32 +35,30 @@ def RMSprop(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-10,
     return coords, evaluated
 
 def Momentum(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-10, beta=0.9):
-    cur = init.copy()
-    v = np.zeros_like(list(cur), dtype=float)
-    grad = np.empty_like(list(cur), dtype=float)
-    _, vars = f(**cur)
+    v = np.zeros_like(list(init), dtype=float)
+    grad = np.empty_like(list(init), dtype=float)
+    _, vars = f(**init)
     _.backward()
-    coords = np.array([[cur[k] for k in cur]])
+    coords = np.array([[var.v for var in vars.values()]])
     evaluated = np.array([_.v])
     prev_f = _.v
-    prev_grad_norm = np.linalg.norm(np.array([vars[k].grad for k in cur]))
+    prev_grad_norm = np.linalg.norm(np.array([var.grad for var in vars.values()]))
     for cnt in range(iter):
         for idx, k in enumerate(vars):
             grad[idx] = vars[k].grad
-        v = beta * v + lr * grad
-        for idx, k in enumerate(cur):
-            cur[k] = cur[k] - v[idx]
-            vars[k].v = cur[k]
+        v = beta * v - lr *  grad
+        for idx, var in enumerate(vars.values()):
+            var.v += v[idx]
         _.forward()
-        _.backward()
         if (np.abs(prev_f - _.v) < tol):
             print(f"Terminate by f_value after {cnt} iterations")
             break
-        grad_norm = np.linalg.norm(np.array([vars[k].grad for k in cur]))
+        _.backward()
+        grad_norm = np.linalg.norm(np.array([var.grad for var in vars.values()]))
         if np.abs(grad_norm - prev_grad_norm) < tol:
             print(f"Terminate by gradient after {cnt} iterations")
             break
-        coords = np.append(coords, np.array([[cur[k] for k in cur]]), axis=0)
+        coords = np.append(coords, np.array([[var.v for var in vars.values()]]), axis=0)
         evaluated = np.append(evaluated, np.array([_.v]), axis=0)
         prev_f = _.v
         prev_grad_norm = grad_norm
@@ -142,19 +66,269 @@ def Momentum(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-10
     # print(evaluated)
     return coords, evaluated
 
+def Momentum_(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-10, beta=0.9):
+    
+    v = np.zeros_like(list(init), dtype=float)
+    grad = np.empty_like(list(init), dtype=float)
+    _, vars = f(**init)
+    _.backward()
+    coords = np.array([[init[k] for k in init]])
+    evaluated = np.array([_.v])
+    prev_f = _.v
+    prev_grad_norm = np.linalg.norm(np.array([vars[k].grad for k in init]))
+    for cnt in range(iter):
+        for idx, k in enumerate(vars):
+            grad[idx] = vars[k].grad
+        v = beta * v + grad
+        print(v)
+
+        for idx, k in enumerate(init):
+            init[k] = init[k] - lr * v[idx]
+            vars[k].v = init[k]
+        print(init)
+
+        _.forward()
+        if (np.abs(prev_f - _.v) < tol):
+            print(f"Terminate by f_value after {cnt} iterations")
+            break
+        _.backward()
+        grad_norm = np.linalg.norm(np.array([vars[k].grad for k in init]))
+        if np.abs(grad_norm - prev_grad_norm) < tol:
+            print(f"Terminate by gradient after {cnt} iterations")
+            break
+        coords = np.append(coords, np.array([[init[k] for k in init]]), axis=0)
+        evaluated = np.append(evaluated, np.array([_.v]), axis=0)
+        prev_f = _.v
+        prev_grad_norm = grad_norm
+    # print(coords)
+    # print(evaluated)
+    return coords, evaluated
+
+def Momentum__(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-10, beta=0.9):
+    
+    v = np.zeros_like(list(init), dtype=float)
+    grad = np.empty_like(list(init), dtype=float)
+    _, vars = f(**init)
+    _.backward()
+    coords = np.array([[init[k] for k in init]])
+    evaluated = np.array([_.v])
+    prev_f = _.v
+    prev_grad_norm = np.linalg.norm(np.array([vars[k].grad for k in init]))
+    for cnt in range(iter):
+        for idx, k in enumerate(vars):
+            grad[idx] = vars[k].grad
+        v = beta * v + (1 - beta) *  grad
+        print(v)
+
+        for idx, k in enumerate(init):
+            init[k] = init[k] - lr * v[idx]
+            vars[k].v = init[k]
+        print(init)
+        _.forward()
+        if (np.abs(prev_f - _.v) < tol):
+            print(f"Terminate by f_value after {cnt} iterations")
+            break
+        _.backward()
+        grad_norm = np.linalg.norm(np.array([vars[k].grad for k in init]))
+        if np.abs(grad_norm - prev_grad_norm) < tol:
+            print(f"Terminate by gradient after {cnt} iterations")
+            break
+        coords = np.append(coords, np.array([[init[k] for k in init]]), axis=0)
+        evaluated = np.append(evaluated, np.array([_.v]), axis=0)
+        prev_f = _.v
+        prev_grad_norm = grad_norm
+    # print(coords)
+    # print(evaluated)
+    return coords, evaluated
+
+# def Nesterov(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-10, beta=0.9):
+#     
+#     v = np.zeros_like(list(init), dtype=float)
+#     grad = np.empty_like(list(init), dtype=float)
+#     _, vars = f(**init)
+#     _.backward()
+#     coords = np.array([[init[k] for k in init]])
+#     evaluated = np.array([_.v])
+#     prev_f = _.v
+#     prev_grad_norm = np.linalg.norm(np.array([vars[k].grad for k in init]))
+#     for cnt in range(iter):
+#         for idx, k in enumerate(vars):
+#             grad[idx] = vars[k].grad
+#         v = beta * v - lr * grad
+#         for idx, k in enumerate(init):
+#             init[k] = init[k] + (beta ** 2) * v[idx] - (1 + beta) * lr * grad[idx]
+#             vars[k].v = init[k]
+#         _.forward()
+#         if (np.abs(prev_f - _.v) < tol):
+#             print(f"Terminate by f_value after {cnt} iterations")
+#             break
+#         _.backward()
+#         grad_norm = np.linalg.norm(np.array([vars[k].grad for k in init]))
+#         if np.abs(grad_norm - prev_grad_norm) < tol:
+#             print(f"Terminate by gradient after {cnt} iterations")
+#             break
+#         coords = np.append(coords, np.array([[init[k] for k in init]]), axis=0)
+#         evaluated = np.append(evaluated, np.array([_.v]), axis=0)
+#         prev_f = _.v
+#         prev_grad_norm = grad_norm
+#     # print(coords)
+#     # print(evaluated)
+#     return coords, evaluated
+
+def Nesterov(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-10, beta=0.9):
+    v = np.zeros_like(list(init), dtype=float)
+    grad = np.empty_like(list(init), dtype=float)
+
+    _, vars = f(**init)
+    _.backward()
+    _next, _vars = f(**init)
+    _next.backward()
+
+    coords = np.array([[var.v for var in vars.values()]])
+    evaluated = np.array([_.v])
+    prev_f = _.v
+    prev_grad_norm = np.linalg.norm(np.array([var.grad for var in vars.values()]))
+    for cnt in range(iter):
+        for idx, k in enumerate(_vars):
+            _vars[k].v = vars[k].v + beta * v[idx]
+        _next.forward()
+        _next.backward()
+        for idx, var in enumerate(_vars.values()):
+            grad[idx] = var.grad
+        v = beta * v - lr * grad
+        for idx, var in enumerate(vars.values()):
+            var.v += v[idx]
+        _.forward()
+        if (np.abs(prev_f - _.v) < tol):
+            print(f"Terminate by f_value after {cnt} iterations")
+            break
+        _.backward()
+        grad_norm = np.linalg.norm(np.array([var.grad for var in vars.values()]))
+        if np.abs(grad_norm - prev_grad_norm) < tol:
+            print(f"Terminate by gradient after {cnt} iterations")
+            break
+        coords = np.append(coords, np.array([[var.v for var in vars.values()]]), axis=0)
+        evaluated = np.append(evaluated, np.array([_.v]), axis=0)
+        prev_f = _.v
+        prev_grad_norm = grad_norm
+    # print(coords)
+    # print(evaluated)
+    return coords, evaluated
+
+def AdaGrad(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-10, epsilon=1e-8):
+    v = np.zeros_like(list(init), dtype=float)
+    grad = np.empty_like(list(init), dtype=float)
+    _, vars = f(**init)
+    _.backward()
+    coords = np.array([[var.v for var in vars.values()]])
+    evaluated = np.array([_.v])
+    prev_f = _.v
+    prev_grad_norm = np.linalg.norm(np.array([var.grad for var in vars.values()]))
+    for cnt in range(iter):
+        for idx, var in enumerate(vars.values()):
+            grad[idx] = var.grad
+        v += np.square(grad)
+        for idx, var in enumerate(vars.values()):
+            var.v -= lr * grad[idx] / (np.sqrt(v[idx]) + epsilon)
+        _.forward()
+        if (np.abs(prev_f - _.v) < tol):
+            print(f"Terminate by f_value after {cnt} iterations")
+            break
+        _.backward()
+        grad_norm = np.linalg.norm(np.array([var.grad for var in vars.values()]))
+        if np.abs(grad_norm - prev_grad_norm) < tol:
+            print(f"Terminate by gradient after {cnt} iterations")
+            break
+        coords = np.append(coords, np.array([[var.v for var in vars.values()]]), axis=0)
+        evaluated = np.append(evaluated, np.array([_.v]), axis=0)
+        prev_f = _.v
+        prev_grad_norm = grad_norm
+    # print(coords)
+    # print(evaluated)
+    return coords, evaluated
+
+def RMSprop(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-10, beta=0.9, epsilon=1e-8):
+    
+    v = np.zeros_like(list(init), dtype=float)
+    grad = np.empty_like(list(init), dtype=float)
+    _, vars = f(**init)
+    _.backward()
+    coords = np.array([[var.v for var in vars.values()]])
+    evaluated = np.array([_.v])
+    prev_f = _.v
+    prev_grad_norm = np.linalg.norm(np.array([var.grad for var in vars.values()]))
+    for cnt in range(iter):
+        for idx, var in enumerate(vars.values()):
+            grad[idx] = var.grad
+        v = beta * v + (1 - beta) * np.square(grad)
+        for idx, var in enumerate(vars.values()):
+            var.v -= lr * grad[idx] / (np.sqrt(v[idx]) + epsilon)
+        _.forward()
+        if (np.abs(prev_f - _.v) < tol):
+            print(f"Terminate by f_value after {cnt} iterations")
+            break
+        _.backward()
+        grad_norm = np.linalg.norm(np.array([var.grad for var in vars.values()]))
+        if np.abs(grad_norm - prev_grad_norm) < tol:
+            print(f"Terminate by gradient after {cnt} iterations")
+            break
+        coords = np.append(coords, np.array([[var.v for var in vars.values()]]), axis=0)
+        evaluated = np.append(evaluated, np.array([_.v]), axis=0)
+        prev_f = _.v
+        prev_grad_norm = grad_norm
+    # print(coords)
+    # print(evaluated)
+    return coords, evaluated
+
+def Adam(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-10, beta1=0.9, beta2=0.999, epsilon=1e-8):
+    
+    m = np.zeros_like(list(init), dtype=float)
+    v = np.zeros_like(list(init), dtype=float)
+    grad = np.empty_like(list(init), dtype=float)
+    _, vars = f(**init)
+    _.backward()
+    coords = np.array([[var.v for var in vars.values()]])
+    evaluated = np.array([_.v])
+    prev_f = _.v
+    prev_grad_norm = np.linalg.norm(np.array([var.grad for var in vars.values()]))
+    for cnt in range(iter):
+        for idx, var in enumerate(vars.values()):
+            grad[idx] = var.grad
+        m = beta1 * m + (1 - beta1) * grad
+        v = beta2 * v + (1 - beta2) * np.square(grad)
+        m_hat = m / (1 - np.power(beta1, cnt + 1))
+        v_hat = v / (1 - np.power(beta2, cnt + 1))
+        for idx, var in enumerate(vars.values()):
+            var.v -= lr * m_hat[idx] / (np.sqrt(v_hat[idx]) + epsilon)
+        _.forward()
+        if (np.abs(prev_f - _.v) < tol):
+            print(f"Terminate by f_value after {cnt} iterations")
+            break
+        _.backward()
+        grad_norm = np.linalg.norm(np.array([var.grad for var in vars.values()]))
+        if np.abs(grad_norm - prev_grad_norm) < tol:
+            print(f"Terminate by gradient after {cnt} iterations")
+            break
+        coords = np.append(coords, np.array([[var.v for var in vars.values()]]), axis=0)
+        evaluated = np.append(evaluated, np.array([_.v]), axis=0)
+        prev_f = _.v
+        prev_grad_norm = grad_norm
+    # print(coords)
+    # print(evaluated)
+    return coords, evaluated
+
+
 def BFGS(f, init:dict, iter, tol=1e-10, alpha_=1.0, rho=0.8, min_alpha=1e-8):
     '''
     :param rho : The shrinking factor of step size during linear search
     :param alpha : Act like "learning_rate" in gradient descent
     '''
-    x_k = init.copy()
-    x_next = init.copy()
 
-    _, vars = f(**x_k)
+    _, vars = f(**init)
     _.backward()
-    _next, vars_next = f(**x_next)
+    _next, vars_next = f(**init)
 
-    coords = np.array([[x_k[k] for k in x_k]])
+    coords = np.array([[var.v for var in vars.values()]])
     evaluated = np.array([_.v])
     I = np.eye(len(list(init)))
     H_k = I
@@ -165,55 +339,49 @@ def BFGS(f, init:dict, iter, tol=1e-10, alpha_=1.0, rho=0.8, min_alpha=1e-8):
 
     for cnt in range(iter):
         # Compute gradient and search direction
-        g_k = np.array([vars[k].grad for k in x_k])
+        g_k = np.array([var.grad for var in vars.values()])
         p_k = -np.dot(H_k, g_k)
         # Perform line search
         alpha = alpha_
-        for idx, k in enumerate(x_k):
-            x_next[k] = x_k[k] + alpha * p_k[idx]
-            vars_next[k].v = x_next[k]
+        for idx, k in enumerate(vars):
+            vars_next[k].v = vars[k].v + alpha * p_k[idx]
         _next.forward()
         _next.backward()
-        g_next = np.array([vars_next[k].grad for k in x_next])
+        g_next = np.array([var.grad for var in vars_next.values()])
 
         # Check strong Wolfe's Condition
         while _next.v >= _.v + c1 * alpha * np.dot(g_k, p_k) or np.dot(g_next, p_k) <= c2 * np.dot(g_k, p_k):
             alpha *= rho
-            for idx, k in enumerate(x_k):
-                x_next[k] = x_k[k] + alpha * p_k[idx]
-                vars_next[k].v = x_next[k]
+            for idx, k in enumerate(vars):
+                vars_next[k].v = vars[k].v + alpha * p_k[idx]
             _next.forward()
             _next.backward()
-            g_next = np.array([vars_next[k].grad for k in x_k])
-
+            g_next = np.array([var.grad for var in vars_next.values()])
             if alpha < min_alpha:
                 break
 
         # Update parameters and gradients
-        x_prev = x_k.copy()
+        x_prev = np.array([var.v for var in vars.values()])
         g_prev = g_k.copy()
         f_prev = _.v
-        for idx, k in enumerate(x_k):
-            x_k[k] = x_k[k] + alpha * p_k[idx]
-            vars[k].v = x_k[k]
-        _.forward()
 
+        for idx, var in enumerate(vars.values()):
+            var.v += alpha * p_k[idx]
+        _.forward()
         if (np.abs(f_prev - _.v) < tol):
             print(f"Terminate by f_value after {cnt} iterations")
             break
-
         _.backward()
-        g_k = np.array([vars[k].grad for k in x_k])
-
+        g_k = np.array([var.grad for var in vars.values()])
         if np.abs(np.linalg.norm(g_k) - np.linalg.norm(g_prev)) < tol:
             print(f"Terminate by gradient after {cnt} iterations")
             break
 
-        coords = np.append(coords, np.array([[x_k[k] for k in x_k]]), axis=0)
+        coords = np.append(coords, np.array([[var.v for var in vars.values()]]), axis=0)
         evaluated = np.append(evaluated, np.array([_.v]), axis=0)
 
         # Compute difference vectors
-        s_k = np.array([x_k[k] for k in x_k]) - np.array([x_prev[k] for k in x_prev])
+        s_k = alpha * p_k
         y_k = g_k - g_prev
         rk_inv = np.dot(y_k, s_k)
         if rk_inv == 0: # Prevent zero division
@@ -232,6 +400,8 @@ def animate(coords, f, title="Visualization", filename="animate.gif", fps=2):
     contour = ax.contour(x, y, f(x=x, y=y), levels=15)
     plt.clabel(contour, inline=True, fontsize=15)
     plt.title(f"{title}", fontsize=40)
+    plt.xlabel("x", fontsize=30)
+    plt.ylabel("y", fontsize=30)
     length = coords.shape[0]
 
     def animate_(i):
@@ -247,9 +417,15 @@ def animate(coords, f, title="Visualization", filename="animate.gif", fps=2):
             x = coords[i, [0]]
             y = coords[i, [1]]
             plt.scatter(x, y, c="blue", s=250)
-    anim = animation.FuncAnimation(fig, animate_, frames=length)
-    writergif = animation.PillowWriter(fps=fps)
-    anim.save(f"{filename}", writer=writergif)
+    if filename[-3:] in ["png", "jpg"]:
+        for idx in range(length):
+            animate_(idx)
+        plt.savefig(filename)
+    elif filename[-3:] == "gif":
+        anim = animation.FuncAnimation(fig, animate_, frames=length)
+        writergif = animation.PillowWriter(fps=fps)
+        anim.save(f"{filename}", writer=writergif)
+
 
 if __name__ == "__main__":
     # f = expression_to_function("x^2")
