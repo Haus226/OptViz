@@ -16,15 +16,20 @@ The purpose of this project is to implement an Automatic Differentiation (AD) li
 </div>
 
 ### AST and DAG
-- The figure on the left is the AST built from Rastrigin Function
-- The figure in the middle is the DAG formed using AST Parser
-- The figure on the right is the DAG formed using Postfix Parser
-- There is actually no difference between the two DAG figures instead just a reflection.
 <div style="display: flex; flex-wrap: nowrap;">
     <img src="visualize/rastrigin_AST.png" style="width: 300px;" alt="Down Hill Simplex">
     <img src="visualize/rastrigin_DAG_AST.png" style="width: 300px;" alt="Simulated Annealing">
     <img src="visualize/rastrigin_DAG_PF.png" style="width: 300px;" alt="Vanilla Gradient Descending">
 </div>
+
+- The figure on the left represents the Abstract Syntax Tree (AST) built from the Rastrigin Function. The AST is a hierarchical representation of the mathematical expression, where each node corresponds to an operator or operand, and the edges represent the relationships between them.
+
+- The figure in the middle is the Directed Acyclic Graph (DAG) formed using the AST Parser. The DAG is derived from the AST and is used to optimize the evaluation of the expression during automatic differentiation. It represents the same expression as the AST but in a more efficient form, eliminating redundant calculations and reducing memory usage.
+
+- The figure on the right is the DAG formed using the Postfix Parser. Like the middle figure, this DAG also represents the same expression as the AST but with a different order of evaluation between the operators that have the same precedence. This difference in evaluation order does not affect the final result of the calculation; it only impacts the sequence in which certain operations are performed.
+
+- Both DAG figures serve the same purpose, which is to facilitate automatic differentiation and gradient computation for optimization algorithms. They represent the computational graph of the expression, which allows efficient computation of derivatives with respect to the variables in the expression.
+
 
 
 ## Features
