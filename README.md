@@ -71,23 +71,23 @@ We leverage the automatic differentiation library to implement various optimizat
 Leverage the automatic differentiation library to implement various optimization algorithms, making it easier for users to optimize their custom mathematical functions. The implemented optimization algorithms include popular methods like vanilla gradient descent, momentum-based gradient descent, RMSprop optimizer, Adam optimizer and the BFGS algorithm.
 
 ### Structure of the repository
-- [Var.py](Var.py):
+- [`Var.py`](Var.py):
 
-    - This file contains the core of the Automatic Differentiation (AD) library. It includes the implementation of the main class "Var," which is responsible for representing variables in the expression. The file also contains the functions for forward propagation, backward propagation, and drawing the Directed Acyclic Graph (DAG) between Var objects.
+    - This file contains the core of the Automatic Differentiation (AD) library. It includes the implementation of the main class "Var" which is responsible for representing variables in the expression. The file also contains the functions for forward propagation, backward propagation, and drawing the Directed Acyclic Graph (DAG) between Var objects.
         - forward: The forward function efficiently updates the value and gradient of each Var object constructed from the expression. Instead of repeatedly constructing and destructing objects, it optimizes the process by updating values in-place.
         - backward: The backward function performs backpropagation to propagate the gradient through the expression, efficiently calculating the gradients of each variable with respect to the output.
         - draw_dag: The draw_dag function allows for visualizing the DAG that shows the dependencies between the Var objects.
-- VarMath.py:
+- [`VarMath.py`](VarMath.py):
 
     - This file contains the implementation of math functions compatible with Var objects. It defines functions that can work with Var objects and compute their values and gradients correctly.
-- [ParserAST.py](ParserAST.py):
+- [`ParserAST.py`](ParserAST.py):
 
     - This file implements the Abstract Syntax Tree (AST) to convert mathematical expressions in string literals into Python functions. The parser builds an AST representation of the expression, which is then used to create Python functions for automatic differentiation and standard math calculations.
 draw_ast: The draw_ast function enables visualization of the AST that is built from the mathematical expression.
-- [ParserPostfix.py](ParserPostfix.py):
+- [`ParserPostfix.py`](ParserPostfix.py):
 
     - This file implements the Shunting-Yard Algorithm and Postfix Evaluation Algorithm to convert mathematical expressions in string literals into Python functions. The parser first transforms the expression from infix notation into postfix notation and then evaluates it to create the Python functions for automatic differentiation and standard math calculations.
-- [graDescending.py](graDescending.py):
+- [`graDescending.py`](graDescending.py):
 
     - This file implements various Gradient Descent Algorithms, including:
         - [Vanilla Gradient Descent](https://en.wikipedia.org/wiki/Gradient_descent)
@@ -98,7 +98,7 @@ draw_ast: The draw_ast function enables visualization of the AST that is built f
         - [Adam Optimizer](https://optimization.cbe.cornell.edu/index.php?title=Adam)
         - [BFGS Algorithm](https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm#Algorithm)
     - The file also provides an animate function to visualize the optimization process.
-- [main.py](main.py):
+- [`main.py`](main.py):
     - This file serves as a test bed for the AD library. It contains tests with several functions, including:
         - Sphere Function
         - [Himmelblau Function](https://en.wikipedia.org/wiki/Himmelblau%27s_function)
