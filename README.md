@@ -7,16 +7,19 @@ The purpose of this project is to implement an Automatic Differentiation (AD) li
 - Math Expression Parser: The library provides two parsers to read mathematical expressions in string literals and transform them into functions compatible with automatic differentiation. One parser is based on Abstract Syntax Tree (AST), and the other one uses the Shunting Yard Algorithm and Postfix Evaluation.
 - Optimization Algorithms: Apply the automatic differentiation library to implement various optimization algorithms, including:
     - Vanilla Gradient Descent
-    - Adam Optimizer
-    - RMSprop Optimizer
     - Momentum-based Gradient Descent
+    - Nesterov-based Gradient Descent
+    - AdaGrad Optimizer
+    - RMSprop Optimizer
+    - Adam Optimizer
     - BFGS Algorithm
 
 ## Implementation Details
 ### Reverse Mode Automatic Differentiation
 I define a class called Var to represent variables or constant and their gradients during the forward and backward passes. The core of the library involves overloading arithmetic operators (+, -, *, /, **) to support the computation of gradients during automatic differentiation.
-At the same time, common used math function (Var version) such as sin, cos, tan are also being implemented. The library also provides a function "draw_dag" to visualize the
-relationship between the gradient of the variables etc. (Graphviz need to be installed)
+At the same time, common used math function (Var version) such as sin, cos, tan are also being implemented. The library also provides a function "draw_dag" to visualize the relationship between the gradient of the variables etc. (Graphviz need to be installed)
+
+
 
 ### Math Expression Parsers
 - AST-based
@@ -37,10 +40,50 @@ We leverage the automatic differentiation library to implement various optimizat
 Leverage the automatic differentiation library to implement various optimization algorithms, making it easier for users to optimize their custom mathematical functions. The implemented optimization algorithms include popular methods like vanilla gradient descent, momentum-based gradient descent, RMSprop optimizer, Adam optimizer and the BFGS algorithm.
 
 ### Structure of the repository
-- Var.py
-- VarMath.py
-- graDescending.py
-- main.py
+- Var.py:
 
-### Examples
+    - This file contains the core of the Automatic Differentiation (AD) library. It includes the implementation of the main class "Var," which is responsible for representing variables in the expression. The file also contains the functions for forward propagation, backward propagation, and drawing the Directed Acyclic Graph (DAG) between Var objects.
+        - forward: The forward function efficiently updates the value and gradient of each Var object constructed from the expression. Instead of repeatedly constructing and destructing objects, it optimizes the process by updating values in-place.
+        - backward: The backward function performs backpropagation to propagate the gradient through the expression, efficiently calculating the gradients of each variable with respect to the output.
+        - draw_dag: The draw_dag function allows for visualizing the DAG that shows the dependencies between the Var objects.
+- VarMath.py:
+
+    - This file contains the implementation of math functions compatible with Var objects. It defines functions that can work with Var objects and compute their values and gradients correctly.
+- ParserAST.py:
+
+    - This file implements the Abstract Syntax Tree (AST) to convert mathematical expressions in string literals into Python functions. The parser builds an AST representation of the expression, which is then used to create Python functions for automatic differentiation and standard math calculations.
+draw_ast: The draw_ast function enables visualization of the AST that is built from the mathematical expression.
+- ParserPostfix.py:
+
+    - This file implements the Shunting-Yard Algorithm and Postfix Evaluation Algorithm to convert mathematical expressions in string literals into Python functions. The parser first transforms the expression from infix notation into postfix notation and then evaluates it to create the Python functions for automatic differentiation and standard math calculations.
+- graDescending.py:
+
+    - This file implements various Gradient Descent Algorithms, including:
+        - [Vanilla Gradient Descent](https://en.wikipedia.org/wiki/Gradient_descent)
+        - [Momentum-based Gradient Descent](https://optimization.cbe.cornell.edu/index.php?title=Momentum)
+        - [Nesterov-based Gradient Descent](https://www.codingninjas.com/studio/library/nesterov-accelerated-gradient)
+        - [AdaGrad Optimizer](https://optimization.cbe.cornell.edu/index.php?title=AdaGrad)
+        - [RMSprop Optimizer](https://optimization.cbe.cornell.edu/index.php?title=RMSProp)
+        - [Adam Optimizer](https://optimization.cbe.cornell.edu/index.php?title=Adam)
+        - [BFGS Algorithm](https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm#Algorithm)
+    - The file also provides an animate function to visualize the optimization process.
+- main.py:
+    - This file serves as a test bed for the AD library. It contains tests with several functions, including:
+        - Sphere Function
+        - [Himmelblau Function](https://en.wikipedia.org/wiki/Himmelblau%27s_function)
+        - [Ackley Function](https://en.wikipedia.org/wiki/Ackley_function)
+        - [Rastrigin Function](https://en.wikipedia.org/wiki/Rastrigin_function)
+        - [Rosenbrock Function](https://en.wikipedia.org/wiki/Rosenbrock_function)
+
+### Visualization
+<div style="display: flex; flex-wrap: nowrap;">
+    <img src="output_gif/Momentum_himmelblau.gif" style="width: 255px;" alt="Down Hill Simplex">
+    <img src="output_gif/Nesterov_himmelblau.gif" style="width: 255px;" alt="Simulated Annealing">
+    <img src="output_gif/AdaGrad_himmelblau.gif" style="width: 255px;" alt="Vanilla Gradient Descending">
+</div>
+<div style="display: flex; flex-wrap: nowrap;">
+    <img src="output_gif/RMSprop_himmelblau.gif" style="width: 255px;" alt="Adam Gradient Descending">
+    <img src="output_gif/Adam_himmelblau.gif" style="width: 255px;" alt="RMSProp Gradient Descending">
+    <img src="output_gif/BFGS_himmelblau.gif" style="width: 255px;" alt="Momentum Gradient Descending">
+</div>
 
