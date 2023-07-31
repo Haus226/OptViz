@@ -2,6 +2,31 @@
 ## Introduction
 The purpose of this project is to implement an Automatic Differentiation (AD) library using the reverse mode, a powerful technique that efficiently computes gradients of functions. The motivation behind this implementation is to address the limitations of numeric difference methods, which can introduce errors in gradient calculations. The AD library enables us to accurately and efficiently compute gradients, making it suitable for optimization algorithms like gradient descent.
 
+## Visualization
+### Optimization Process
+<div style="display: flex; flex-wrap: nowrap;">
+    <img src="output_gif/Momentum_himmelblau.gif" style="width: 255px;" alt="Down Hill Simplex">
+    <img src="output_gif/Nesterov_himmelblau.gif" style="width: 255px;" alt="Simulated Annealing">
+    <img src="output_gif/AdaGrad_himmelblau.gif" style="width: 255px;" alt="Vanilla Gradient Descending">
+</div>
+<div style="display: flex; flex-wrap: nowrap;">
+    <img src="output_gif/RMSprop_himmelblau.gif" style="width: 255px;" alt="Adam Gradient Descending">
+    <img src="output_gif/Adam_himmelblau.gif" style="width: 255px;" alt="RMSProp Gradient Descending">
+    <img src="output_gif/BFGS_himmelblau.gif" style="width: 255px;" alt="Momentum Gradient Descending">
+</div>
+
+### AST and DAG
+- The figure on the left is the AST built from Rastrigin Function
+- The figure in the middle is the DAG formed using AST Parser
+- The figure on the right is the DAG formed using Postfix Parser
+- There is actually no difference between the two DAG figures instead just a reflection.
+<div style="display: flex; flex-wrap: nowrap;">
+    <img src="visualize/rastrigin_AST.png" style="width: 300px;" alt="Down Hill Simplex">
+    <img src="visualize/rastrigin_DAG_AST.png" style="width: 300px;" alt="Simulated Annealing">
+    <img src="visualize/rastrigin_DAG_PF.png" style="width: 300px;" alt="Vanilla Gradient Descending">
+</div>
+
+
 ## Features
 - Reverse Mode Automatic Differentiation: The library implements reverse mode AD, a technique that efficiently computes gradients for a given mathematical function.
 - Math Expression Parser: The library provides two parsers to read mathematical expressions in string literals and transform them into functions compatible with automatic differentiation. One parser is based on Abstract Syntax Tree (AST), and the other one uses the Shunting Yard Algorithm and Postfix Evaluation.
@@ -74,16 +99,4 @@ draw_ast: The draw_ast function enables visualization of the AST that is built f
         - [Ackley Function](https://en.wikipedia.org/wiki/Ackley_function)
         - [Rastrigin Function](https://en.wikipedia.org/wiki/Rastrigin_function)
         - [Rosenbrock Function](https://en.wikipedia.org/wiki/Rosenbrock_function)
-
-### Visualization
-<div style="display: flex; flex-wrap: nowrap;">
-    <img src="output_gif/Momentum_himmelblau.gif" style="width: 255px;" alt="Down Hill Simplex">
-    <img src="output_gif/Nesterov_himmelblau.gif" style="width: 255px;" alt="Simulated Annealing">
-    <img src="output_gif/AdaGrad_himmelblau.gif" style="width: 255px;" alt="Vanilla Gradient Descending">
-</div>
-<div style="display: flex; flex-wrap: nowrap;">
-    <img src="output_gif/RMSprop_himmelblau.gif" style="width: 255px;" alt="Adam Gradient Descending">
-    <img src="output_gif/Adam_himmelblau.gif" style="width: 255px;" alt="RMSProp Gradient Descending">
-    <img src="output_gif/BFGS_himmelblau.gif" style="width: 255px;" alt="Momentum Gradient Descending">
-</div>
 
