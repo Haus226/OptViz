@@ -80,12 +80,9 @@ def Momentum_(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-1
         for idx, k in enumerate(vars):
             grad[idx] = vars[k].grad
         v = beta * v + grad
-        print(v)
 
-        for idx, k in enumerate(init):
-            init[k] = init[k] - lr * v[idx]
-            vars[k].v = init[k]
-        print(init)
+        for idx, var in enumerate(vars.values()):
+            var.v += -lr * v[idx]
 
         _.forward()
         if (np.abs(prev_f - _.v) < tol):
@@ -118,12 +115,8 @@ def Momentum__(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-
         for idx, k in enumerate(vars):
             grad[idx] = vars[k].grad
         v = beta * v + (1 - beta) *  grad
-        print(v)
-
-        for idx, k in enumerate(init):
-            init[k] = init[k] - lr * v[idx]
-            vars[k].v = init[k]
-        print(init)
+        for idx, var in enumerate(vars.values()):
+            var.v += -lr * v[idx]
         _.forward()
         if (np.abs(prev_f - _.v) < tol):
             print(f"Terminate by f_value after {cnt} iterations")
