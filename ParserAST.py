@@ -1,5 +1,4 @@
-from Var import Var, FUNC, CONSTANT, MATH_FUNC, draw_dag
-from VarMath import *
+from Var import Var, FUNC, CONSTANT, MATH_FUNC, CONSTANT_, PRECEDENCE
 import re, os
 from graphviz import Digraph
 
@@ -120,7 +119,7 @@ def evaluateVar(ast, variables):
     elif ast['type'] == 'function_call':
         function_exp = ast['func']
         args = [evaluateVar(arg, variables) for arg in ast['args']]
-        return FUNC_[function_exp](args[0])
+        return MATH_FUNC[function_exp][1](args[0])
     raise ValueError("Invalid AST node")
 
 def evaluateFunc(ast, variables):
@@ -215,19 +214,7 @@ def expression_to_function(expr_str):
     return func, f
 
 if __name__ == "__main__":
-    def test_sanity_check():
-        x = Var(.12)
-        y = Var(.13)
-        t = Var(.14)
 
-        z = sin(x ** 2) + log(y @ sin(x)) + exp(t)
-
-        z.backward()
-        # draw_dag(z)
-        print(y)
-        print(x)
-        print(t)
-        print(z)
 
     # test_sanity_check()
     # test_sanity_check()

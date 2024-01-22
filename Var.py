@@ -11,46 +11,48 @@ TRIGO_FUNC = "exp|log|sin|cos|tan|arcsin|arccos|arctan|asin|acos|atan|cot|sec|co
 HYPERBOLIC_FUNC = "sinh|cosh|tanh|arcsinh|arccosh|arctanh|asinh|acosh|atanh|coth|sech|cosech|csch|arcoth|arcsech|arccosech|arccsch|acoth|asech|acosech|acsch"
 FUNC = rf"{TRIGO_FUNC + HYPERBOLIC_FUNC}"
 CONSTANT = r'pi|\be\b'
+PRECEDENCE = {'^': 4, '*': 3, '/': 3, '+': 2, '-': 2, }
+CONSTANT_ = {"pi": np.pi, "e": np.e}
 MATH_FUNC = {
     'log': [np.log, lambda x: 1.0 / x],
     'exp': [np.exp, np.exp],
     'sin': [np.sin, np.cos],
-    'cos': [np.cos, lambda x: - np.sin(x)],
-    'tan': np.tan,
-    'sec': lambda x: 1.0 / np.cos(x),  # Define sec as 1/cos(x)
-    'cosec': lambda x: 1.0 / np.sin(x),  # Define cosec as 1/sin(x)
-    'cot': lambda x: 1.0 / np.tan(x),
-    'arcsin': np.arcsin,
-    'asin': np.arcsin,
-    'arccos': np.arccos,
-    'acos': np.arccos,
-    'arctan': np.arctan,
-    'atan': np.arctan,
-    'arccsc': lambda x: np.arcsin(1.0 / x),  # Inverse of cosec is arcsin(1/x)
-    'acsc': lambda x: np.arcsin(1.0 / x),
-    'arcsec': lambda x: np.arccos(1.0 / x),  # Inverse of sec is arccos(1/x)
-    'asec': lambda x: np.arccos(1.0 / x),
-    'arcot': lambda x: np.arctan(1.0 / x),  # Inverse of cot is arctan(1/x)
-    'acot': lambda x: np.arctan(1.0 / x),
-    'sinh': np.sinh,
-    'cosh': np.cosh,
-    'tanh': np.tanh,
-    'arcsinh': np.arcsinh,
-    'asinh': np.arcsinh,
-    'arccosh': np.arccosh,
-    'acosh': np.arccosh,
-    'arctanh': np.arctanh,
-    'atanh': np.arctanh,
-    'sech': lambda x: 1.0 / np.cosh(x),  # Define sech as 1/cosh(x)
-    'cosech': lambda x: 1.0 / np.sinh(x),  # Define cosech as 1/sinh(x)
-    'csch': lambda x: 1.0 / np.sinh(x),  # Define csch as 1/sinh(x)
-    'coth': lambda x: 1.0 / np.tanh(x),  # Define coth as 1/tanh(x)
+    'cos': [np.cos, lambda x: -np.sin(x)],
+    'tan': [np.tan, lambda x: (1.0 / np.cos(x)) ** 2],
+    'sec': [lambda x: 1.0 / np.cos(x), lambda x:(1.0 / np.cos(x)) * np.tan(x)], 
+    'cosec': [lambda x: 1.0 / np.sin(x), lambda x: -(1.0 / np.sin(x) ** 2) * np.cos(x)],  
+    'cot': [lambda x: 1.0 / np.tan(x), lambda x: -(1.0 / np.sin(x) ** 2)],
+    'arcsin': [np.arcsin, lambda x: 1.0 / np.sqrt(1 - x ** 2)],
+    'asin': [np.arcsin, lambda x: 1.0 / np.sqrt(1 - x ** 2)],
+    'arccos': [np.arccos, lambda x: -1.0 / np.sqrt(1 - x ** 2)],
+    'acos': [np.arccos, lambda x: -1.0 / np.sqrt(1 - x ** 2)],
+    'arctan': [np.arctan, lambda x: 1.0 / (1 + x ** 2)],
+    'atan': [np.arctan, lambda x: 1.0 / (1 + x ** 2)],
+    'arccsc': [lambda x: np.arcsin(1.0 / x),  lambda x: 1.0 / (abs(x) * np.sqrt(x ** 2 - 1))], # Inverse of cosec is arcsin(1/x)
+    'acsc': [lambda x: np.arcsin(1.0 / x),  lambda x: 1.0 / (abs(x) * np.sqrt(x ** 2 - 1))], 
+    'arcsec': [lambda x: np.arcsin(1.0 / x),  lambda x: 1.0 / (abs(x) * np.sqrt(x ** 2 - 1))], 
+    'asec': [lambda x: np.arccos(1.0 / x),  lambda x: 1.0 / (abs(x) * np.sqrt(x ** 2 - 1))], 
+    'arcot': [lambda x: np.arctan(1.0 / x), lambda x:-1.0 / (1 + x ** 2)], # Inverse of cot is arctan(1/x)
+    'acot': [lambda x: np.arctan(1.0 / x), lambda x:-1.0 / (1 + x ** 2)],
+    'sinh': [np.sinh, np.cosh],
+    'cosh': [np.cosh, np.sinh],
+    'tanh': [np.tanh, lambda x: 1.0 / np.cosh(x) ** 2],
+    'arcsinh': [np.arcsinh, lambda x: 1.0 / np.sqrt(x ** 2 + 1)],
+    'asinh': [np.arcsinh, lambda x: 1.0 / np.sqrt(x ** 2 + 1)],
+    'arccosh': [np.arccosh, lambda x: 1.0 / np.sqrt(x ** 2 - 1)],
+    'acosh': [np.arccosh, lambda x: 1.0 / np.sqrt(x ** 2 - 1)],
+    'arctanh': [np.arctanh, lambda x: 1.0 / (1 - x ** 2)],
+    'atanh': [np.arctanh, lambda x: 1.0 / (1 - x ** 2)],
+    'sech': [lambda x: 1.0 / np.cosh(x), lambda x: -np.tanh(x) / np.cosh(x)],  # Define sech as 1/cosh(x)
+    'cosech': [lambda x: 1.0 / np.sinh(x),  lambda x: -1.0 / (np.sinh(x) ** 2) * np.tanh(x)], # Define cosech as 1/sinh(x)
+    'csch': [lambda x: 1.0 / np.sinh(x),  lambda x: -1.0 / (np.sinh(x) ** 2) * np.tanh(x)], # Define csch as 1/sinh(x)
+    'coth': [lambda x: 1.0 / np.tanh(x), lambda x: -1.0 / np.sinh(x) ** 2], # Define coth as 1/tanh(x)
     'arccsch': lambda x: np.arcsinh(1.0 / x),  # Inverse of cosec is arcsin(1/x)
-    'acsch': lambda x: np.arcsinh(1.0 / x),
-    'arcsech': lambda x: np.acosh(1.0 / x),  # Inverse of sec is arccos(1/x)
-    'asech': lambda x: np.arccosh(1.0 / x),
-    'arcoth': lambda x: np.arctanh(1.0 / x),  # Inverse of cot is arctan(1/x)
-    'acoth': lambda x: np.arctanh(1.0 / x),
+    'acsch': [lambda x: np.acosh(1.0 / x), lambda x: -1.0 / (abs(x) * np.sqrt(1 - x ** 2))],
+    'arcsech': [lambda x: np.acosh(1.0 / x), lambda x: -1.0 / (abs(x) * np.sqrt(1 - x ** 2))],  # Inverse of sec is arccos(1/x)
+    'asech': [lambda x: np.arccosh(1.0 / x), lambda x: -1.0 / (abs(x) * np.sqrt(1 - x** 2))],
+    'arcoth': [lambda x: np.arctanh(1.0 / x), lambda x: 1.0 / (1 - x ** 2)],  # Inverse of cot is arctan(1/x)
+    'acoth': [lambda x: np.arctanh(1.0 / x), lambda x: 1.0 / (1 - x ** 2)]
 }
 
 

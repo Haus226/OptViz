@@ -1,7 +1,6 @@
 import os
 import re
-from Var import Var, FUNC, CONSTANT, MATH_FUNC
-from VarMath import *
+from Var import Var, FUNC, CONSTANT, MATH_FUNC, CONSTANT_, PRECEDENCE
 
 # For visualization, make sure graphviz is installed and added into environment path
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz/bin/'
@@ -144,6 +143,9 @@ def ShuntingYard(expression):
 
 
 def evaluateVar(tokens: list, vars):
+    '''
+    The operands are Var instances
+    '''
     def apply_binop(op, operand_1: Var, operand_2: Var):
         if op == "+":
             return operand_1 + operand_2
@@ -158,13 +160,15 @@ def evaluateVar(tokens: list, vars):
 
     stack = []
     for token in tokens:
+        print(token)
         if re.match(r'-*\d*\.*\d+', token):
             stack.append(Var(float(token), type="number", info=token, exp=token))
         elif re.match(CONSTANT, token.lower()):
             stack.append(Var(CONSTANT_[token.lower()], type="constant", info=token.lower(), exp=token.lower()))
         elif re.match(FUNC, token):
             operand = stack.pop()
-            result = FUNC_[token](operand)
+            result = Var(MATH_FUNC[token][0](operand.v), [[operand, MATH_FUNC[token][1](operand.v)]], type="func", info=token, exp=f"{token}(" + operand.exp + ")")
+            # result = FUNC_[token](operand)
             stack.append(result)
         elif re.match(r'[a-zA-Z]', token):
             stack.append(vars[token])
