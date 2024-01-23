@@ -1,4 +1,4 @@
-from Var import Var, FUNC, CONSTANT, MATH_FUNC, CONSTANT_, PRECEDENCE
+from lib.Var import Var, FUNC, CONSTANT, MATH_FUNC, CONSTANT_, PRECEDENCE
 import re, os
 from graphviz import Digraph
 

@@ -1,6 +1,6 @@
-from Var import Var, draw_dag
-from ParserAST import expression_to_function
-# from ParserPostfix import expression_to_function
+# from ParserAST import expression_to_function
+from lib.ParserPostfix import expression_to_function
+from lib.Var import draw_dag
 import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
@@ -18,10 +18,12 @@ def GradientDescending(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:f
         for var in vars.values():
             var.v -= lr * var.grad
         _.forward()
+        print("v:", _.v)
         if (np.abs(prev_f - _.v) < tol):
             print(f"Terminate by f_value after {cnt} iterations")
             break
         _.backward()
+
         grad_norm = np.linalg.norm(np.array([var.grad for var in vars.values()]))
         if np.abs(grad_norm - prev_grad_norm) < tol:
             print(f"Terminate by gradient after {cnt} iterations")
@@ -30,6 +32,7 @@ def GradientDescending(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:f
         evaluated = np.append(evaluated, np.array([_.v]), axis=0)
         prev_f = _.v
         prev_grad_norm = grad_norm
+    
     # print(coords)
     # print(evaluated)
     return coords, evaluated
@@ -82,7 +85,7 @@ def Momentum_(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-1
         v = beta * v + grad
 
         for idx, var in enumerate(vars.values()):
-            var.v += -lr * v[idx]
+            var.v -= lr * v[idx]
 
         _.forward()
         if (np.abs(prev_f - _.v) < tol):
@@ -116,7 +119,7 @@ def Momentum__(f:callable, init:dict, lr:float=0.01, iter:int=100, tol:float=1e-
             grad[idx] = vars[k].grad
         v = beta * v + (1 - beta) *  grad
         for idx, var in enumerate(vars.values()):
-            var.v += -lr * v[idx]
+            var -= lr * v[idx]
         _.forward()
         if (np.abs(prev_f - _.v) < tol):
             print(f"Terminate by f_value after {cnt} iterations")
@@ -390,7 +393,7 @@ def animate(coords, f, title="Visualization", filename="animate.gif", fps=2):
     x = np.arange(np.min(coords[:, 0] - .5), np.max(coords[:, 0] + .5), 0.05)
     y = np.arange(np.min(coords[:, 1] - .5), np.max(coords[:, 1] + 0.5), 0.05)
     x, y = np.meshgrid(x, y)
-    contour = ax.contour(x, y, f(x=x, y=y), levels=15)
+    contour = ax.contour(x, y, f(x=x, y=y))
     plt.clabel(contour, inline=True, fontsize=15)
     plt.title(f"{title}", fontsize=40)
     plt.xlabel("x", fontsize=30)

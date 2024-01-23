@@ -1,6 +1,6 @@
 import os
 import re
-from Var import Var, FUNC, CONSTANT, MATH_FUNC, CONSTANT_, PRECEDENCE
+from lib.Var import Var, FUNC, CONSTANT, MATH_FUNC, CONSTANT_, PRECEDENCE
 
 # For visualization, make sure graphviz is installed and added into environment path
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz/bin/'
