@@ -4,7 +4,13 @@ from ad.grad import GradDescent, AdaGrad, RMSprop, Momentum, Adam, Nesterov
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, origins=['http://automaticdifferentiation-frontend.up.railway.app'])
+CORS(app, resources={
+    r"/*": {  # Allow all routes
+        "origins": ["https://automaticdifferentiation-frontend.up.railway.app"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 parser = SYParser()
 
 @app.route('/gradient-descent', methods=['POST'])
