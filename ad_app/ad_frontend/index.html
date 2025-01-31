@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradient Descent Animation</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.4.4/math.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            gap: 20px;
+        }
+
+        .controls-panel {
+            flex: 0 0 300px;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .plots-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .plot-container {
+            flex: 1;
+            min-height: 400px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #start {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #start.resume {
+            background-color: #2196F3;
+        }
+
+        #pause {
+            background-color: #FFC107;
+            color: black;
+        }
+
+        #reset {
+            background-color: #f44336;
+            color: white;
+        }
+
+        button:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .info p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .info span {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .status.running {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .status.paused {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+
+        .status.completed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #ddd;
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.01s linear;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="controls-panel">
+            <h1>Gradient Descent</h1>
+            <div class="input-group">
+                <label for="equation">Equation:</label>
+                <input type="text" id="equation" value="x^2 + y^2" placeholder="e.g., x^2 + y^2">
+            </div>
+            <div class="input-group">
+                <label for="startX">Starting X:</label>
+                <input type="number" id="startX" value="5">
+            </div>
+            <div class="input-group">
+                <label for="startY">Starting Y:</label>
+                <input type="number" id="startY" value="5">
+            </div>
+            <div class="input-group">
+                <label for="learningRate">Learning Rate:</label>
+                <input type="number" id="learningRate" value="0.1" step="0.01">
+            </div>
+            <div class="input-group">
+                <label for="steps">Number of Steps:</label>
+                <input type="number" id="steps" value="50">
+            </div>
+            <div class="input-group">
+                <label for="optimizer">Optimizer:</label>
+                <select id="optimizer">
+                    <option value="gradient_descent">Gradient Descent</option>
+                    <option value="adagrad">AdaGrad</option>
+                    <option value="rmsprop">RMSprop</option>
+                    <option value="momentum">Momentum</option>
+                    <option value="adam">Adam</option>
+                    <option value="nesterov">Nesterov</option>
+                    <option value="bfgs">BFGS</option>
+                </select>
+            </div>
+            <div class="buttons">
+                <button id="start">Start</button>
+                <button id="pause">Pause</button>
+                <button id="reset">Reset</button>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
+            <div class="status">Ready to start</div>
+            <div class="info">
+                <p>Iteration: <span id="iteration">0</span></p>
+                <p>Coordinates: <span id="coordinates">(0, 0)</span></p>
+                <p>Function Value: <span id="function-value">0</span></p>
+            </div>
+        </div>
+        <div class="plots-panel">
+            <div class="plot-container" id="surface-plot"></div>
+            <div class="plot-container" id="contour-plot"></div>
+        </div>
+    </div>
+    <script>
+        let history = [];
+        let currentStep = 0;
+        let animationInterval;
+        let currentFrame = 0;
+        let isPaused = false;
+        let inputsChanged = false;
+
+        function evaluateFunction(x, y, equation) {
+            const expr = math.compile(equation);
+            return expr.evaluate({ x: x, y: y });
+        }
+
+        function generateSurfaceData() {
+            const equation = document.getElementById('equation').value;
+            const xValues = math.range(-10, 10, 0.5).toArray();
+            const yValues = math.range(-10, 10, 0.5).toArray();
+            const z = [];
+
+            for (let i = 0; i < yValues.length; i++) {
+                const row = [];
+                for (let j = 0; j < xValues.length; j++) {
+                    row.push(evaluateFunction(xValues[j], yValues[i], equation));
+                }
+                z.push(row);
+            }
+
+            return { x: xValues, y: yValues, z: z };
+        }
+
+        async function fetchData() {
+            const equation = document.getElementById('equation').value;
+            const startX = parseFloat(document.getElementById('startX').value);
+            const startY = parseFloat(document.getElementById('startY').value);
+            const learningRate = parseFloat(document.getElementById('learningRate').value);
+            const steps = parseInt(document.getElementById('steps').value);
+            const optimizer = document.getElementById('optimizer').value;
+
+            updateStatus('running');
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/gradient-descent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ equation, startX, startY, learningRate, steps, optimizer })
+                });
+
+                if (response.ok) {
+                    history = await response.json();
+                    currentStep = 0;
+                    inputsChanged = false;
+                    initializePlots();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                updateStatus('error');
+            }
+        }
+
+        function updateStatus(state) {
+            const statusEl = document.querySelector('.status');
+            const progressBar = document.querySelector('.progress-bar-fill');
+
+            statusEl.className = 'status ' + state;
+
+            switch (state) {
+                case 'running':
+                    statusEl.textContent = 'Animation in progress...';
+                    break;
+                case 'paused':
+                    statusEl.textContent = 'Animation paused';
+                    break;
+                case 'completed':
+                    statusEl.textContent = 'Animation completed!';
+                    progressBar.style.width = '100%';
+                    break;
+                case 'error':
+                    statusEl.textContent = 'Error occurred';
+                    break;
+                default:
+                    statusEl.textContent = 'Ready to start';
+                    progressBar.style.width = '0%';
+            }
+        }
+
+        function initializePlots() {
+            const { x, y, z } = generateSurfaceData();
+
+            // 3D Surface Plot
+            const surface = {
+                type: 'surface',
+                x: x,
+                y: y,
+                z: z,
+                colorscale: 'Viridis',
+                contours: {
+                    z: {
+                        show: true,
+                        usecolormap: true,
+                        highlightcolor: "#42f462"
+                    }
+                }
+            };
+
+            const surfacePath = {
+                type: 'scatter3d',
+                mode: 'lines+markers',
+                x: [history.coords[0][0]],
+                y: [history.coords[0][1]],
+                z: [history.evaluated[0]],
+                line: { color: 'yellow', width: 4 },
+                marker: { size: 8, color: 'red' }
+            };
+
+            const surfaceLayout = {
+                title: '3D Surface Plot',
+                autosize: true,
+                scene: {
+                    camera: {
+                        up: { x: 0, y: 0, z: 1 },
+                        center: { x: 0, y: 0, z: 0 },
+                        eye: { x: 1.5, y: 1.5, z: 1.5 }
+                    }
+                },
+                margin: { l: 0, r: 0, t: 30, b: 0 }
+            };
+
+            // Contour Plot
+            const contour = {
+                type: 'contour',
+                x: x,
+                y: y,
+                z: z,
+                colorscale: 'Viridis',
+                contours: {
+                    coloring: 'heatmap'
+                }
+            };
+
+            const contourPath = {
+                type: 'scatter',
+                mode: 'lines+markers',
+                x: [history.coords[0][0]],
+                y: [history.coords[0][1]],
+                line: { color: 'yellow', width: 3 },
+                marker: { size: 10, color: 'red' }
+            };
+
+            const contourLayout = {
+                title: 'Contour Plot',
+                xaxis: { range: [-10, 10] },
+                yaxis: { range: [-10, 10] },
+                margin: { l: 50, r: 50, t: 30, b: 50 }
+            };
+
+            Plotly.newPlot('surface-plot', [surface, surfacePath], surfaceLayout);
+            Plotly.newPlot('contour-plot', [contour, contourPath], contourLayout);
+
+
+            clearInterval(animationInterval);
+            animationInterval = setInterval(animate, 100);
+            updateStatus('running');
+        }
+
+        function animate() {
+            if (currentStep >= history.coords.length) {
+                clearInterval(animationInterval);
+                updateStatus('completed');
+                return;
+            }
+
+            // Update progress bar
+            const progress = (currentStep / history.coords.length) * 100;
+            document.querySelector('.progress-bar-fill').style.width = `${progress}%`;
+
+            // Update path for both plots
+            const coords = history.coords.slice(0, currentStep + 1);
+            const values = history.evaluated.slice(0, currentStep + 1);
+
+            // Update 3D plot
+            const surface3dUpdate = {
+                x: [coords.map(c => c[0])],
+                y: [coords.map(c => c[1])],
+                z: [values]
+            };
+
+            // Update contour plot
+            const contourUpdate = {
+                x: [coords.map(c => c[0])],
+                y: [coords.map(c => c[1])]
+            };
+
+            Plotly.update('surface-plot', surface3dUpdate, {}, [1]);
+            Plotly.update('contour-plot', contourUpdate, {}, [1]);
+
+            // Rotate 3D view
+            const camera = {
+                up: { x: 0, y: 0, z: 1 },
+                center: { x: 0, y: 0, z: 0 },
+                eye: {
+                    x: 1.5,
+                    y: 1.5,
+                    z: 1.5
+                }
+            };
+
+            Plotly.relayout('surface-plot', { 'scene.camera': camera });
+
+            // Update info
+            const [x, y] = history.coords[currentStep];
+            const value = history.evaluated[currentStep];
+            updateInfo(x, y, value, currentStep);
+
+            currentStep++;
+            currentFrame++;
+        }
+
+        // Input change handlers
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('change', () => {
+                inputsChanged = true;
+                const startButton = document.getElementById('start');
+                startButton.textContent = 'Start';
+                startButton.classList.remove('resume');
+                updateStatus('ready');
+            });
+        });
+
+        // Event Listeners
+        document.getElementById('start').addEventListener('click', () => {
+            const startButton = document.getElementById('start');
+
+            if (isPaused && !inputsChanged) {
+                // Resume animation
+                animationInterval = setInterval(animate, 100);
+                startButton.textContent = 'Start';
+                startButton.classList.remove('resume');
+                isPaused = false;
+                updateStatus('running');
+            } else {
+                // Start new animation
+                clearInterval(animationInterval);
+                fetchData();
+                startButton.textContent = 'Start';
+                startButton.classList.remove('resume');
+                isPaused = false;
+            }
+        });
+
+        function updateInfo(x, y, value, currentStep) {
+            document.getElementById('iteration').textContent = currentStep;
+            document.getElementById('coordinates').textContent = `(${x.toFixed(4)}, ${y.toFixed(4)})`;
+            document.getElementById('function-value').textContent = value.toFixed(4);
+        }
+
+        document.getElementById('pause').addEventListener('click', () => {
+            clearInterval(animationInterval);
+            isPaused = true;
+            const startButton = document.getElementById('start');
+            startButton.textContent = 'Resume';
+            startButton.classList.add('resume');
+            updateStatus('paused');
+        });
+
+        document.getElementById('reset').addEventListener('click', () => {
+            clearInterval(animationInterval);
+            currentStep = 0;
+            currentFrame = 0;
+            history = [];
+            isPaused = false;
+            inputsChanged = false;
+            const startButton = document.getElementById('start');
+            startButton.textContent = 'Start';
+            startButton.classList.remove('resume');
+            updateStatus('ready');
+            initializePlots();
+        });
+
+        // Initial plot
+        initializePlots();
+    </script>
+</body>
+
+</html>

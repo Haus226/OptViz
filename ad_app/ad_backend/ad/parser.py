@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 import re
-from var import Var, FUNC, CONSTANT, MATH_FUNC, CONSTANT_, PRECEDENCE
-from utils import binop, tokenize
-from visualizer import ASTVisualizer
+from .var import Var, FUNC, CONSTANT, MATH_FUNC, CONSTANT_, PRECEDENCE
+from .utils import binop, tokenize
+from .visualizer import ASTVisualizer
 
 class Parser(ABC):
     

@@ -1,5 +1,11 @@
 from graphviz import Digraph
-from var import Var
+from .var import Var
+
+
+# For visualization, make sure graphviz is installed and added into environment path
+# import os
+# os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz/bin/'
+
 
 class ASTVisualizer:
 
