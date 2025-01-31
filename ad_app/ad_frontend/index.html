@@ -272,7 +272,7 @@
             updateStatus('running');
 
             try {
-                const response = await fetch('http://automaticdifferentiation-production.up.railway.app/gradient-descent', {
+                const response = await fetch('https://automaticdifferentiation-production.up.railway.app/gradient-descent', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ equation, startX, startY, learningRate, steps, optimizer })
