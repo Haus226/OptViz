@@ -209,7 +209,6 @@
                     <option value="momentum">Momentum</option>
                     <option value="adam">Adam</option>
                     <option value="nesterov">Nesterov</option>
-                    <option value="bfgs">BFGS</option>
                 </select>
             </div>
             <div class="buttons">
@@ -273,7 +272,7 @@
             updateStatus('running');
 
             try {
-                const response = await fetch('http://127.0.0.1:5000/gradient-descent', {
+                const response = await fetch('http://automaticdifferentiation-production.up.railway.app/gradient-descent', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ equation, startX, startY, learningRate, steps, optimizer })
