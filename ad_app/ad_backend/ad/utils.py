@@ -1,5 +1,4 @@
 import re
-from graphviz import Digraph
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation

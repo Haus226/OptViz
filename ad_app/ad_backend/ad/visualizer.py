@@ -1,4 +1,3 @@
-from graphviz import Digraph
 from .var import Var
 
 
