@@ -13,7 +13,7 @@ CORS(app, resources={
 })
 parser = SYParser()
 
-@app.route('/gradient-descent', methods=['POST'])
+@app.route('/', methods=['POST'])
 def gradient_descent():
     data = request.json
     print(data)
@@ -22,7 +22,7 @@ def gradient_descent():
     startY = float(data.get('startY'))  # Starting Y value
     learning_rate = float(data.get('learningRate'))  # Learning rate
     steps = int(data.get('steps'))  # Number of steps
-    optimizer = data.get('optimizer', 'gradient_descent')  # Optimizer type
+    optimizer = data.get('optimizer')  # Optimizer type
 
     # Parse the equation into a callable function
     func, f = parser.exp2func(equation)
