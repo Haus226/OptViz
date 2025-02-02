@@ -2,8 +2,6 @@ import numpy as np
 
 
 # TODO:
-# LION
-# Tiger
 # CAME
 # Lamb
 # Shampoo
@@ -11,12 +9,9 @@ import numpy as np
 # SOAP
 # MARS
 # APOLLO
-# signSGD
 # Lookahead
-# NAdam
 # Adan
 # Adai
-# AdaBelief
 
 
 
@@ -47,16 +42,42 @@ class GradDescent:
     def nesterov(self):
         pass
 
+class SignSGD(GradDescent):
+    def __init__(self, func, init_p, lr=0.01):
+        super().__init__(func, init_p, lr)
+
+    def update(self):
+        for var in self.var_dict.values():
+            var.v -= self.lr * np.sign(var.grad)
+
 class AdaGrad(GradDescent):
     def __init__(self, func, init_p, lr=0.01, epsilon=1e-8):
         super().__init__(func, init_p, lr)
         self.v = np.zeros_like(list(init_p), dtype=float)
+        self.grad = np.empty_like(list(init_p), dtype=float)
         self.epsilon = epsilon
 
     def update(self):
         self.v += np.square(self.grad)
         for idx, var in enumerate(self.var_dict.values()):
             var.v -= self.lr * var.grad / (np.sqrt(self.v[idx]) + self.epsilon)
+
+class AdaDelta(GradDescent):
+    def __init__(self, func, init_p, lr=0.01, beta=0.95, epsilon=1e-8):
+        super().__init__(func, init_p, lr)
+        self.beta = beta
+        self.epsilon = epsilon
+        self.grad = np.zeros(list(init_p), dtype=float)
+        self.g_sq = np.zeros_like(list(init_p), dtype=float)
+        self.delta_x_sq = np.zeros_like(list(init_p), dtype=float)
+
+    def update(self):
+        self.g_sq = self.beta * self.g_sq + (1 - self.beta) * np.square(self.grad)
+        delta = np.sqrt((self.delta_x_sq + self.epsilon) / (self.squared_grad + self.epsilon)) * self.grad
+        self.delta_x_sq = self.beta * self.delta_x_sq + (1 - self.beta) * delta ** 2
+        for idx, var in enumerate(self.var_dict.values()):
+            var.v += delta[idx]
+
 
 class RMSprop(GradDescent):
     def __init__(self, func, init_p, lr=0.01, beta=0.9, epsilon=1e-8):
@@ -66,7 +87,6 @@ class RMSprop(GradDescent):
         self.epsilon = epsilon
         self.grad = np.empty_like(list(init_p), dtype=float)
 
-    
     def update(self):
         self.v = self.beta * self.v + (1 - self.beta) * np.square(self.grad)
         for idx, var in enumerate(self.var_dict.values()):
@@ -95,27 +115,6 @@ class Momentum(GradDescent):
                 for idx, var in enumerate(self.var_dict.values()):
                     var.v -= self.lr * self.m[idx]
 
-class Adam(GradDescent):
-
-    def __init__(self, func, init_p, lr = 0.01, beta_1=0.9, beta_2=0.999, epsilon=1e-8):
-        super().__init__(func, init_p, lr)
-        self.beta_1 = beta_1
-        self.beta_2 = beta_2
-        self.eps = epsilon
-        self.m = np.zeros_like(list(init_p), dtype=float)
-        self.v = np.zeros_like(list(init_p), dtype=float)
-        self.grad = np.empty_like(list(init_p), dtype=float)
-        self.t = 0
-
-    def update(self):
-        self.m = self.beta_1 * self.m + (1 - self.beta_1) * self.grad
-        self.v = self.beta_2 * self.v + (1 - self.beta_2) * np.square(self.grad)
-        m_hat = self.m / (1 - np.power(self.beta_1, self.t + 1))
-        v_hat = self.v / (1 - np.power(self.beta_2, self.t + 1))
-        for idx, var in enumerate(self.var_dict.values()):
-            var.v -= self.lr * m_hat[idx] / (np.sqrt(v_hat[idx]) + self.eps)
-        self.t += 1
-            
 class Nesterov(Momentum):
     def __init__(self, func, init_p, lr=0.01, beta=0.9):
         super().__init__(func, init_p, lr, beta)
@@ -133,6 +132,99 @@ class Nesterov(Momentum):
         self.m = self.beta * self.m - self.lr * self.grad
         for idx, var in enumerate(self.var_dict.values()):
             var.v += self.m[idx]
+
+class Adam(GradDescent):
+
+    def __init__(self, func, init_p, lr = 0.01, beta_1=0.9, beta_2=0.999, weight_decay=0, epsilon=1e-8):
+        super().__init__(func, init_p, lr)
+        self.beta_1 = beta_1
+        self.beta_2 = beta_2
+        self.eps = epsilon
+        self.m = np.zeros_like(list(init_p), dtype=float)
+        self.v = np.zeros_like(list(init_p), dtype=float)
+        self.grad = np.empty_like(list(init_p), dtype=float)
+        self.t = 0
+        self.weight_decay = weight_decay
+
+    def update(self):
+        if self.weight_decay:
+            for idx, var in enumerate(self.var_dict.values()):
+                self.grad[idx] += self.weight_decay * var.v
+        self.m = self.beta_1 * self.m + (1 - self.beta_1) * self.grad
+        self.v = self.beta_2 * self.v + (1 - self.beta_2) * np.square(self.grad)
+        m_hat = self.m / (1 - np.power(self.beta_1, self.t + 1))
+        v_hat = self.v / (1 - np.power(self.beta_2, self.t + 1))
+        for idx, var in enumerate(self.var_dict.values()):
+            var.v -= self.lr * m_hat[idx] / (np.sqrt(v_hat[idx]) + self.eps)
+        self.t += 1
+            
+class NAdam(Adam):
+    def __init__(self, func, init_p, lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=1e-8):
+        super().__init__(func, init_p, lr, beta_1, beta_2, epsilon)
+
+    def update(self):
+        self.m = self.beta_1 * self.m + (1 - self.beta_1) * self.grad
+        self.v = self.beta_2 * self.v + (1 - self.beta_2) * np.square(self.grad)
+        m_hat = self.m / (1 - np.power(self.beta_1, self.t + 1))
+        v_hat = self.v / (1 - np.power(self.beta_2, self.t + 1))
+        for idx, var in enumerate(self.var_dict.values()):
+            var.v -= (self.lr / (np.sqrt(v_hat[idx]) + self.eps)) * (self.beta_1 * m_hat[idx] + (1 - self.beta_1) * self.grad[idx] / (1 - np.power(self.beta_1, self.t + 1)))
+        self.t += 1
+
+class AdaBelief(Adam):
+    def __init__(self, func, init_p, lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=1e-8):
+        super().__init__(func, init_p, lr, beta_1, beta_2, epsilon)
+
+    def update(self):
+        self.m = self.beta_1 * self.m + (1 - self.beta_1) * self.grad
+        self.v = self.beta_2 * self.v + (1 - self.beta_2) * np.square(self.grad - self.m) + self.eps
+        m_hat = self.m / (1 - np.power(self.beta_1, self.t + 1))
+        v_hat = self.v / (1 - np.power(self.beta_2, self.t + 1))
+        for idx, var in enumerate(self.var_dict.values()):
+            var.v -= (self.lr / (np.sqrt(v_hat[idx]) + self.eps)) * (self.beta_1 * m_hat[idx] + (1 - self.beta_1) * self.grad[idx] / (1 - np.power(self.beta_1, self.t + 1)))
+        self.t += 1
+
+class AdamW(Adam):
+    def __init__(self, func, init_p, lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=1e-8, weight_decay=0.01):
+        super().__init__(func, init_p, lr, beta_1, beta_2, weight_decay, epsilon)
+
+    def update(self):
+        self.m = self.beta_1 * self.m + (1 - self.beta_1) * self.grad
+        self.v = self.beta_2 * self.v + (1 - self.beta_2) * np.square(self.grad)
+        m_hat = self.m / (1 - np.power(self.beta_1, self.t + 1))
+        v_hat = self.v / (1 - np.power(self.beta_2, self.t + 1))
+        
+        for idx, var in enumerate(self.var_dict.values()):
+            var.v -= self.lr * (m_hat[idx] / (np.sqrt(v_hat[idx]) + self.eps) + self.weight_decay * var.v)  # Decoupled weight decay
+        
+        self.t += 1
+
+class Lion(GradDescent):
+    def __init__(self, func, init_p, lr=0.01, beta_1=0.9, beta_2=0.99, weight_decay=10):
+        super().__init__(func, init_p, lr)
+        self.beta_1 = beta_1
+        self.beta_2 = beta_2
+        self.grad = np.empty_like(list(init_p), dtype=float)
+        self.weight_decay = weight_decay
+
+    def update(self):
+        c = self.beta_1 * self.m + (1 - self.beta_1) * self.grad
+        for idx, var in enumerate(self.var_dict.values()):
+            var.v -= self.lr * (np.sign(c[idx]) + self.weight_decay * var.v)  # Decoupled weight decay
+        self.m = self.beta_2 * self.m + (1 - self.beta_2) * self.grad
+
+class Tiger(GradDescent):
+    def __init__(self, func, init_p, lr=0.01, beta=0.945, weight_decay=10):
+        super().__init__(func, init_p, lr)
+        self.beta = beta
+        self.grad = np.empty_like(list(init_p), dtype=float)
+        self.weight_decay = weight_decay
+    
+    def update(self):
+        self.m = self.beta * self.m + (1 - self.beta) * self.grad
+        for idx, var in enumerate(self.var_dict.values()):
+            var.v -= self.lr * (np.sign(self.m[idx]) + self.weight_decay * var.v)  # Decoupled weight decay
+
 
 def BFGS(f, init:dict, iter, tol=1e-10, alpha_=1.0, rho=0.8, min_alpha=1e-8):
     '''

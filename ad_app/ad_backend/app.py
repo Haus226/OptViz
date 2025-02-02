@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from ad.parser import SYParser
-from ad.grad import GradDescent, AdaGrad, RMSprop, Momentum, Adam, Nesterov
+from ad.grad import GradDescent, AdaGrad, RMSprop, Momentum, Adam, Nesterov, SignSGD, Adadelta, NAdam, AdaBelief, AdamW, Lion, Tiger
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -29,19 +29,33 @@ def gradient_descent():
 
     # Initialize the optimizer
     init_p = {'x': startX, 'y': startY}
-    print(init_p)
     if optimizer == 'gradient_descent':
         optimizer = GradDescent(func, init_p, lr=learning_rate)
+    elif optimizer == 'signsgd':
+        optimizer = SignSGD(func, init_p, lr=learning_rate)
+    elif optimizer == 'adadelta':
+        optimizer = Adadelta(func, init_p, lr=learning_rate)
     elif optimizer == 'adagrad':
         optimizer = AdaGrad(func, init_p, lr=learning_rate)
     elif optimizer == 'rmsprop':
         optimizer = RMSprop(func, init_p, lr=learning_rate)
     elif optimizer == 'momentum':
         optimizer = Momentum(func, init_p, lr=learning_rate)
-    elif optimizer == 'adam':
-        optimizer = Adam(func, init_p, lr=learning_rate)
     elif optimizer == 'nesterov':
         optimizer = Nesterov(func, init_p, lr=learning_rate)
+    elif optimizer == 'adam':
+        optimizer = Adam(func, init_p, lr=learning_rate)
+    elif optimizer == 'nadam':
+        optimizer = NAdam(func, init_p, lr=learning_rate)
+    elif optimizer == 'adabelief':
+        optimizer = AdaBelief(func, init_p, lr=learning_rate)
+    elif optimizer == 'adamw':
+        optimizer = AdamW(func, init_p, lr=learning_rate)
+    elif optimizer == 'lion':
+        optimizer = Lion(func, init_p, lr=learning_rate)
+    elif optimizer == 'tiger':
+        optimizer = Tiger(func, init_p, lr=learning_rate)
+
     else:
         return jsonify({'error': 'Invalid optimizer'}), 400
 
