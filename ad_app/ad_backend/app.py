@@ -17,12 +17,13 @@ parser = SYParser()
 def gradient_descent():
     data = request.json
     print(data)
-    equation = data.get('equation')  # User-provided equation
-    startX = float(data.get('startX'))  # Starting X value
-    startY = float(data.get('startY'))  # Starting Y value
-    learning_rate = float(data.get('learningRate'))  # Learning rate
-    steps = int(data.get('steps'))  # Number of steps
-    optimizer = data.get('optimizer')  # Optimizer type
+    equation = data.get('equation')
+    startX = float(data.get('startX'))
+    startY = float(data.get('startY'))
+    learning_rate = float(data.get('learningRate'))
+    steps = int(data.get('steps'))
+    optimizer = data.get('optimizer')
+    hyperparameters = data.get('hyperparameters', {})
 
     # Parse the equation into a callable function
     func, f = parser.exp2func(equation)
@@ -34,28 +35,50 @@ def gradient_descent():
     elif optimizer == 'signsgd':
         optimizer = SignSGD(func, init_p, lr=learning_rate)
     elif optimizer == 'adadelta':
-        optimizer = AdaDelta(func, init_p, lr=learning_rate)
+        beta = hyperparameters.get('beta', 0.95)
+        optimizer = AdaDelta(func, init_p, lr=learning_rate, beta=beta)
     elif optimizer == 'adagrad':
         optimizer = AdaGrad(func, init_p, lr=learning_rate)
     elif optimizer == 'rmsprop':
-        optimizer = RMSprop(func, init_p, lr=learning_rate)
+        beta = hyperparameters.get('beta', 0.9)
+        optimizer = RMSprop(func, init_p, lr=learning_rate, beta=beta)
     elif optimizer == 'momentum':
-        optimizer = Momentum(func, init_p, lr=learning_rate)
+        beta = hyperparameters.get('beta', 0.9)
+        mode = hyperparameters.get('mode', 'heavy_ball')
+        optimizer = Momentum(func, init_p, lr=learning_rate, beta=beta, mode=mode)
     elif optimizer == 'nesterov':
-        optimizer = Nesterov(func, init_p, lr=learning_rate)
+        beta = hyperparameters.get('beta', 0.9)
+        optimizer = Nesterov(func, init_p, lr=learning_rate, beta=beta)
     elif optimizer == 'adam':
-        optimizer = Adam(func, init_p, lr=learning_rate)
+        beta_1 = hyperparameters.get('beta1', 0.9)
+        beta_2 = hyperparameters.get('beta2', 0.999)
+        epsilon = hyperparameters.get('epsilon', 1e-8)
+        optimizer = Adam(func, init_p, lr=learning_rate, beta_1=beta_1, beta_2=beta_2, epsilon=epsilon)
     elif optimizer == 'nadam':
-        optimizer = NAdam(func, init_p, lr=learning_rate)
+        beta_1 = hyperparameters.get('beta1', 0.9)
+        beta_2 = hyperparameters.get('beta2', 0.999)
+        epsilon = hyperparameters.get('epsilon', 1e-8)
+        optimizer = NAdam(func, init_p, lr=learning_rate, beta_1=beta_1, beta_2=beta_2, epsilon=epsilon)
     elif optimizer == 'adabelief':
-        optimizer = AdaBelief(func, init_p, lr=learning_rate)
+        beta_1 = hyperparameters.get('beta1', 0.9)
+        beta_2 = hyperparameters.get('beta2', 0.999)
+        epsilon = hyperparameters.get('epsilon', 1e-8)
+        optimizer = AdaBelief(func, init_p, lr=learning_rate, beta_1=beta_1, beta_2=beta_2, epsilon=epsilon)
     elif optimizer == 'adamw':
-        optimizer = AdamW(func, init_p, lr=learning_rate)
+        beta_1 = hyperparameters.get('beta1', 0.9)
+        beta_2 = hyperparameters.get('beta2', 0.999)
+        epsilon = hyperparameters.get('epsilon', 1e-8)
+        weight_decay = hyperparameters.get('weight_decay', 0.01)
+        optimizer = AdamW(func, init_p, lr=learning_rate, beta_1=beta_1, beta_2=beta_2, epsilon=epsilon, weight_decay=weight_decay)
     elif optimizer == 'lion':
-        optimizer = Lion(func, init_p, lr=learning_rate)
+        beta_1 = hyperparameters.get('beta1', 0.9)
+        beta_2 = hyperparameters.get('beta2', 0.999)
+        weight_decay = hyperparameters.get('weight_decay', 0.01)
+        optimizer = Lion(func, init_p, lr=learning_rate, beta_1=beta_1, beta_2=beta_2, weight_decay=weight_decay)
     elif optimizer == 'tiger':
-        optimizer = Tiger(func, init_p, lr=learning_rate)
-
+        beta_1 = hyperparameters.get('beta', 0.945)
+        weight_decay = hyperparameters.get('weight_decay', 0.01)
+        optimizer = Tiger(func, init_p, lr=learning_rate, beta=beta, weight_decay=weight_decay)
     else:
         return jsonify({'error': 'Invalid optimizer'}), 400
 

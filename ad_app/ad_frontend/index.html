@@ -217,37 +217,37 @@
             <h1>Gradient Descent</h1>
             <div class="input-group">
                 <label for="equation">Equation:</label>
-                <input type="text" id="equation" value="x^2 + y^2" placeholder="e.g., x^2 + y^2">
+                <input type="text" id="equation" value="20 + x^2 - (10 * cos(2 * pi * x)) + y^2 - (10 * cos(2 * PI * y))" placeholder="e.g., x^2 + y^2">
             </div>
             <div class="input-group">
                 <label>X-axis Range:</label>
                 <div class="range-inputs">
-                    <input type="number" id="xMin" value="-10" placeholder="Min">
-                    <input type="number" id="xMax" value="10" placeholder="Max">
+                    <input type="number" id="xMin" value="-10" placeholder="Min", step="0.5">
+                    <input type="number" id="xMax" value="10" placeholder="Max", step="0.5">
                 </div>
             </div>
             <div class="input-group">
                 <label>Y-axis Range:</label>
                 <div class="range-inputs">
-                    <input type="number" id="yMin" value="-10" placeholder="Min">
-                    <input type="number" id="yMax" value="10" placeholder="Max">
+                    <input type="number" id="yMin" value="-10" placeholder="Min", step="0.5">
+                    <input type="number" id="yMax" value="10" placeholder="Max", step="0.5">
                 </div>
             </div>
             <div class="input-group">
                 <label for="startX">Starting X:</label>
-                <input type="number" id="startX" value="5">
+                <input type="number" id="startX" value="5", step="0.5">
             </div>
             <div class="input-group">
                 <label for="startY">Starting Y:</label>
-                <input type="number" id="startY" value="5">
+                <input type="number" id="startY" value="5", step="0.5">
             </div>
             <div class="input-group">
                 <label for="learningRate">Learning Rate:</label>
-                <input type="number" id="learningRate" value="0.1" step="0.01">
+                <input type="number" id="learningRate" value="0.01" step="0.01">
             </div>
             <div class="input-group">
                 <label for="steps">Number of Steps:</label>
-                <input type="number" id="steps" value="50">
+                <input type="number" id="steps" value="100", step="10">
             </div>
             <div class="input-group">
                 <label for="optimizer">Optimizer:</label>
@@ -268,6 +268,85 @@
 
                 </select>
             </div>
+
+            <div id="hyperparameters">
+                <!-- Momentum -->
+                <div class="input-group momentum-param" style="display: none;">
+                    <label for="momentum-beta">Beta:</label>
+                    <input type="number" id="momentum-beta" value="0.9" step="0.1" min="0" max="1">
+                </div>
+                <div class="input-group momentum-param" style="display: none;">
+                    <label for="momentum-mode">Mode:</label>
+                    <select id="momentum-mode">
+                        <option value="heavy_ball">Heavy Ball</option>
+                        <option value="classic">Classic</option>
+                        <option value="emwa">EMWA</option>
+                    </select>
+                </div>
+            
+                <!-- Nesterov -->
+                <div class="input-group nesterov-param" style="display: none;">
+                    <label for="nesterov-beta">Beta:</label>
+                    <input type="number" id="nesterov-beta" value="0.9" step="0.1" min="0" max="1">
+                </div>
+            
+                <!-- Adam family parameters -->
+                <div class="input-group adam-param" style="display: none;">
+                    <label for="adam-beta1">Beta 1:</label>
+                    <input type="number" id="adam-beta1" value="0.9" step="0.1" min="0" max="1">
+                </div>
+                <div class="input-group adam-param" style="display: none;">
+                    <label for="adam-beta2">Beta 2:</label>
+                    <input type="number" id="adam-beta2" value="0.999" step="0.001" min="0" max="1">
+                </div>
+                <div class="input-group adam-param" style="display: none;">
+                    <label for="adam-epsilon">Epsilon:</label>
+                    <input type="number" id="adam-epsilon" value="1e-8" step="1e-8" min="0">
+                </div>
+            
+                <!-- Lion parameters -->
+                <div class="input-group lion-param" style="display: none;">
+                    <label for="lion-beta1">Beta 1:</label>
+                    <input type="number" id="lion-beta1" value="0.9" step="0.1" min="0" max="1">
+                </div>
+                <div class="input-group lion-param" style="display: none;">
+                    <label for="lion-beta2">Beta 2:</label>
+                    <input type="number" id="lion-beta2" value="0.99" step="0.01" min="0" max="1">
+                </div>
+                <div class="input-group lion-param" style="display: none;">
+                    <label for="lion-weight-decay">Weight Decay:</label>
+                    <input type="number" id="lion-weight-decay" value="10" step="1" min="0">
+                </div>
+            
+                <!-- Tiger parameters -->
+                <div class="input-group tiger-param" style="display: none;">
+                    <label for="tiger-beta">Beta:</label>
+                    <input type="number" id="tiger-beta" value="0.945" step="0.001" min="0" max="1">
+                </div>
+                <div class="input-group tiger-param" style="display: none;">
+                    <label for="tiger-weight-decay">Weight Decay:</label>
+                    <input type="number" id="tiger-weight-decay" value="10" step="1" min="0">
+                </div>
+            
+                <!-- Weight decay parameter -->
+                <div class="input-group weight-decay-param" style="display: none;">
+                    <label for="weight-decay">Weight Decay:</label>
+                    <input type="number" id="weight-decay" value="0.01" step="0.01" min="0">
+                </div>
+            
+                <!-- RMSprop parameters -->
+                <div class="input-group rmsprop-param" style="display: none;">
+                    <label for="rmsprop-beta">Beta:</label>
+                    <input type="number" id="rmsprop-beta" value="0.9" step="0.1" min="0" max="1">
+                </div>
+            
+                <!-- AdaDelta parameters -->
+                <div class="input-group adadelta-param" style="display: none;">
+                    <label for="adadelta-beta">Beta:</label>
+                    <input type="number" id="adadelta-beta" value="0.95" step="0.01" min="0" max="1">
+                </div>
+            </div>
+
             <div class="speed-controls">
                 <button class="speed-button active" data-speed="1">1x</button>
                 <button class="speed-button" data-speed="2">2x</button>
@@ -330,21 +409,121 @@
             return { x: xValues, y: yValues, z: z };
         }
 
-        async function fetchData() {
-            const equation = document.getElementById('equation').value;
-            const startX = parseFloat(document.getElementById('startX').value);
-            const startY = parseFloat(document.getElementById('startY').value);
-            const learningRate = parseFloat(document.getElementById('learningRate').value);
-            const steps = parseInt(document.getElementById('steps').value);
-            const optimizer = document.getElementById('optimizer').value;
+        document.getElementById('optimizer').addEventListener('change', function () {
+                const optimizer = this.value;
 
+                // Hide all parameter groups first
+                document.querySelectorAll('[class*="-param"]').forEach(el => {
+                    el.style.display = 'none';
+                });
+
+                // Show relevant parameters based on optimizer
+            switch (optimizer) {
+                case 'momentum':
+                    document.querySelectorAll('.momentum-param').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                    break;
+                case 'nesterov':
+                    document.querySelectorAll('.nesterov-param').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                    break;
+                case 'adam':
+                case 'nadam':
+                case 'adabelief':
+                    document.querySelectorAll('.adam-param').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                    break;
+                case 'adamw':
+                    document.querySelectorAll('.adam-param, .weight-decay-param').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                    break;
+                case 'lion':
+                    document.querySelectorAll('.lion-param').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                    break;
+                case 'tiger':
+                    document.querySelectorAll('.tiger-param').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                    break;
+                case 'rmsprop':
+                    document.querySelectorAll('.rmsprop-param').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                    break;
+                case 'adadelta':
+                    document.querySelectorAll('.adadelta-param').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                    break;
+            }
+        });
+
+        async function fetchData() {
+            const optimizer = document.getElementById('optimizer').value;
+            const hyperparameters = {};
+
+            // Add relevant hyperparameters based on optimizer
+            switch (optimizer) {
+                case 'momentum':
+                    hyperparameters.beta = parseFloat(document.getElementById('momentum-beta').value);
+                    hyperparameters.mode = document.getElementById('momentum-mode').value;
+                    break;
+                case 'nesterov':
+                    hyperparameters.beta = parseFloat(document.getElementById('nesterov-beta').value);
+                    break;
+                case 'adam':
+                case 'nadam':
+                case 'adabelief':
+                    hyperparameters.beta1 = parseFloat(document.getElementById('adam-beta1').value);
+                    hyperparameters.beta2 = parseFloat(document.getElementById('adam-beta2').value);
+                    hyperparameters.epsilon = parseFloat(document.getElementById('adam-epsilon').value);
+                    break;
+                case 'adamw':
+                    hyperparameters.beta1 = parseFloat(document.getElementById('adam-beta1').value);
+                    hyperparameters.beta2 = parseFloat(document.getElementById('adam-beta2').value);
+                    hyperparameters.epsilon = parseFloat(document.getElementById('adam-epsilon').value);
+                    hyperparameters.weight_decay = parseFloat(document.getElementById('weight-decay').value);
+                    break;
+                case 'lion':
+                    hyperparameters.beta1 = parseFloat(document.getElementById('lion-beta1').value);
+                    hyperparameters.beta2 = parseFloat(document.getElementById('lion-beta2').value);
+                    hyperparameters.weight_decay = parseFloat(document.getElementById('lion-weight-decay').value);
+                    break;
+                case 'tiger':
+                    hyperparameters.beta = parseFloat(document.getElementById('tiger-beta').value);
+                    hyperparameters.weight_decay = parseFloat(document.getElementById('tiger-weight-decay').value);
+                    break;
+                case 'rmsprop':
+                    hyperparameters.beta = parseFloat(document.getElementById('rmsprop-beta').value);
+                    break;
+                case 'adadelta':
+                    hyperparameters.beta = parseFloat(document.getElementById('adadelta-beta').value);
+                    break;
+            }
+
+            // Add hyperparameters to the request body
+            const requestBody = {
+                equation: document.getElementById('equation').value,
+                startX: parseFloat(document.getElementById('startX').value),
+                startY: parseFloat(document.getElementById('startY').value),
+                learningRate: parseFloat(document.getElementById('learningRate').value),
+                steps: parseInt(document.getElementById('steps').value),
+                optimizer: optimizer,
+                hyperparameters: hyperparameters
+            };
             updateStatus('running');
 
             try {
                 const response = await fetch('https://automaticdifferentiation-backend.up.railway.app/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ equation, startX, startY, learningRate, steps, optimizer })
+                    body: JSON.stringify(requestBody)
                 });
 
                 if (response.ok) {

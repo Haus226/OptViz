@@ -67,7 +67,7 @@ class AdaDelta(GradDescent):
         super().__init__(func, init_p, lr)
         self.beta = beta
         self.epsilon = epsilon
-        self.grad = np.zeros(list(init_p), dtype=float)
+        self.grad = np.zeros_like(list(init_p), dtype=float)
         self.g_sq = np.zeros_like(list(init_p), dtype=float)
         self.delta_x_sq = np.zeros_like(list(init_p), dtype=float)
 
