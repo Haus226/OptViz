@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from ad.parser import SYParser
-from ad.grad import GradDescent, AdaGrad, RMSprop, Momentum, Adam, Nesterov, SignSGD, Adadelta, NAdam, AdaBelief, AdamW, Lion, Tiger
+from ad.grad import GradDescent, AdaGrad, RMSprop, Momentum, Adam, Nesterov, SignSGD, AdaDelta, NAdam, AdaBelief, AdamW, Lion, Tiger
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -34,7 +34,7 @@ def gradient_descent():
     elif optimizer == 'signsgd':
         optimizer = SignSGD(func, init_p, lr=learning_rate)
     elif optimizer == 'adadelta':
-        optimizer = Adadelta(func, init_p, lr=learning_rate)
+        optimizer = AdaDelta(func, init_p, lr=learning_rate)
     elif optimizer == 'adagrad':
         optimizer = AdaGrad(func, init_p, lr=learning_rate)
     elif optimizer == 'rmsprop':
