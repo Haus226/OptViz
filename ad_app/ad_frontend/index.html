@@ -70,6 +70,7 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
+
         .range-inputs {
             display: flex;
             gap: 10px;
@@ -78,7 +79,33 @@
         .range-inputs input {
             width: 50%;
         }
+        .speed-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
 
+        .speed-button {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .speed-button.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #0056b3;
+        }
+
+        .speed-button:hover:not(.active) {
+            background-color: #e9ecef;
+        }
         .buttons {
             display: flex;
             gap: 10px;
@@ -233,6 +260,12 @@
                     <option value="nesterov">Nesterov</option>
                 </select>
             </div>
+            <div class="speed-controls">
+                <button class="speed-button active" data-speed="1">1x</button>
+                <button class="speed-button" data-speed="2">2x</button>
+                <button class="speed-button" data-speed="4">4x</button>
+                <button class="speed-button" data-speed="8">8x</button>
+            </div>
             <div class="buttons">
                 <button id="start">Start</button>
                 <button id="pause">Pause</button>
@@ -260,6 +293,8 @@
         let currentFrame = 0;
         let isPaused = false;
         let inputsChanged = false;
+        let lastOptimizationParams = null;
+        let animationSpeed = 1;
 
         function evaluateFunction(x, y, equation) {
             const expr = math.compile(equation);
@@ -428,78 +463,106 @@
             updateStatus('running');
         }
 
-        function animate() {
-            if (currentStep >= history.coords.length) {
+        function startAnimation() {
                 clearInterval(animationInterval);
-                updateStatus('completed');
-                return;
+                const baseInterval = 100; // Base interval in milliseconds
+                animationInterval = setInterval(animate, baseInterval / animationSpeed);
             }
 
-            // Update progress bar
-            const progress = (currentStep / history.coords.length) * 100;
-            document.querySelector('.progress-bar-fill').style.width = `${progress}%`;
-
-            // Update path for both plots
-            const coords = history.coords.slice(0, currentStep + 1);
-            const values = history.evaluated.slice(0, currentStep + 1);
-
-            // Update 3D plot
-            const surface3dUpdate = {
-                x: [coords.map(c => c[0])],
-                y: [coords.map(c => c[1])],
-                z: [values]
-            };
-
-            // Update contour plot
-            const contourUpdate = {
-                x: [coords.map(c => c[0])],
-                y: [coords.map(c => c[1])]
-            };
-
-            Plotly.update('surface-plot', surface3dUpdate, {}, [1]);
-            Plotly.update('contour-plot', contourUpdate, {}, [1]);
-
-            // Rotate 3D view
-            const camera = {
-                up: { x: 0, y: 0, z: 1 },
-                center: { x: 0, y: 0, z: 0 },
-                eye: {
-                    x: 1.5,
-                    y: 1.5,
-                    z: 1.5
+            function updateAnimationSpeed(speed) {
+                animationSpeed = speed;
+                if (!isPaused && animationInterval) {
+                    startAnimation();
                 }
-            };
 
-            Plotly.relayout('surface-plot', { 'scene.camera': camera });
+                // Update button styles
+                document.querySelectorAll('.speed-button').forEach(button => {
+                    if (parseInt(button.dataset.speed) === speed) {
+                        button.classList.add('active');
+                    } else {
+                        button.classList.remove('active');
+                    }
+                });
+            }
 
-            // Update info
-            const [x, y] = history.coords[currentStep];
-            const value = history.evaluated[currentStep];
-            updateInfo(x, y, value, currentStep);
+            function updateInfo(x, y, value, currentStep) {
+                    document.getElementById('iteration').textContent = currentStep;
+                    document.getElementById('coordinates').textContent = `(${x.toFixed(4)}, ${y.toFixed(4)})`;
+                    document.getElementById('function-value').textContent = value.toFixed(4);
+                }
 
-            currentStep++;
-            currentFrame++;
-        }
+            // Modified animate function to use animation speed
+            function animate() {
+                if (currentStep >= history.coords.length) {
+                    clearInterval(animationInterval);
+                    updateStatus('completed');
+                    return;
+                }
 
-        // Input change handlers
-        const inputs = document.querySelectorAll('input, select');
-        inputs.forEach(input => {
-            input.addEventListener('change', () => {
-                inputsChanged = true;
-                const startButton = document.getElementById('start');
-                startButton.textContent = 'Start';
-                startButton.classList.remove('resume');
-                updateStatus('ready');
+                // Update progress bar
+                const progress = (currentStep / history.coords.length) * 100;
+                document.querySelector('.progress-bar-fill').style.width = `${progress}%`;
+
+                // Get the number of steps to advance based on animation speed
+                const stepsToAdvance = Math.min(animationSpeed, history.coords.length - currentStep);
+
+                // Update path for both plots
+                const coords = history.coords.slice(0, currentStep + stepsToAdvance);
+                const values = history.evaluated.slice(0, currentStep + stepsToAdvance);
+
+                // Update 3D plot
+                const surface3dUpdate = {
+                    x: [coords.map(c => c[0])],
+                    y: [coords.map(c => c[1])],
+                    z: [values]
+                };
+
+                // Update contour plot
+                const contourUpdate = {
+                    x: [coords.map(c => c[0])],
+                    y: [coords.map(c => c[1])]
+                };
+
+                Plotly.update('surface-plot', surface3dUpdate, {}, [1]);
+                Plotly.update('contour-plot', contourUpdate, {}, [1]);
+
+                // Rotate 3D view
+                const camera = {
+                    up: { x: 0, y: 0, z: 1 },
+                    center: { x: 0, y: 0, z: 0 },
+                    eye: {
+                        x: 1.5,
+                        y: 1.5,
+                        z: 1.5
+                    }
+                };
+
+                Plotly.relayout('surface-plot', { 'scene.camera': camera });
+
+                // Update info with the latest position
+                const [x, y] = history.coords[currentStep + stepsToAdvance - 1];
+                const value = history.evaluated[currentStep + stepsToAdvance - 1];
+                updateInfo(x, y, value, currentStep + stepsToAdvance - 1);
+
+                currentStep += stepsToAdvance;
+                currentFrame++;
+            }
+    document.addEventListener('DOMContentLoaded', () => {
+        // Speed control buttons
+        document.querySelectorAll('.speed-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const speed = parseInt(button.dataset.speed);
+                updateAnimationSpeed(speed);
             });
         });
 
-        // Event Listeners
+        // Start button
         document.getElementById('start').addEventListener('click', () => {
             const startButton = document.getElementById('start');
 
             if (isPaused && !inputsChanged) {
                 // Resume animation
-                animationInterval = setInterval(animate, 100);
+                startAnimation();
                 startButton.textContent = 'Start';
                 startButton.classList.remove('resume');
                 isPaused = false;
@@ -507,19 +570,15 @@
             } else {
                 // Start new animation
                 clearInterval(animationInterval);
-                fetchData();
-                startButton.textContent = 'Start';
-                startButton.classList.remove('resume');
-                isPaused = false;
+                fetchData().then(() => {
+                    startButton.textContent = 'Start';
+                    startButton.classList.remove('resume');
+                    isPaused = false;
+                });
             }
         });
 
-        function updateInfo(x, y, value, currentStep) {
-            document.getElementById('iteration').textContent = currentStep;
-            document.getElementById('coordinates').textContent = `(${x.toFixed(4)}, ${y.toFixed(4)})`;
-            document.getElementById('function-value').textContent = value.toFixed(4);
-        }
-
+        // Pause button
         document.getElementById('pause').addEventListener('click', () => {
             clearInterval(animationInterval);
             isPaused = true;
@@ -529,6 +588,7 @@
             updateStatus('paused');
         });
 
+        // Reset button
         document.getElementById('reset').addEventListener('click', () => {
             clearInterval(animationInterval);
             currentStep = 0;
@@ -540,9 +600,21 @@
             startButton.textContent = 'Start';
             startButton.classList.remove('resume');
             updateStatus('ready');
-            initializePlots();
+            initializePlots(true);
         });
+    });
 
+    // Modified input change handlers
+    const inputs = document.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('change', () => {
+            inputsChanged = true;
+            const startButton = document.getElementById('start');
+            startButton.textContent = 'Start';
+            startButton.classList.remove('resume');
+            updateStatus('ready');
+        });
+    });
         // Initial plot
         initializePlots();
     </script>
