@@ -205,6 +205,7 @@ class Lion(GradDescent):
         self.beta_1 = beta_1
         self.beta_2 = beta_2
         self.grad = np.empty_like(list(init_p), dtype=float)
+        self.m = np.zeros_like(list(init_p), dtype=float)
         self.weight_decay = weight_decay
 
     def update(self):
@@ -217,6 +218,7 @@ class Tiger(GradDescent):
     def __init__(self, func, init_p, lr=0.01, beta=0.945, weight_decay=10):
         super().__init__(func, init_p, lr)
         self.beta = beta
+        self.m = np.zeros_like(list(init_p), dtype=float)
         self.grad = np.empty_like(list(init_p), dtype=float)
         self.weight_decay = weight_decay
     
