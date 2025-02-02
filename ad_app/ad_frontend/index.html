@@ -70,6 +70,14 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
+        .range-inputs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .range-inputs input {
+            width: 50%;
+        }
 
         .buttons {
             display: flex;
@@ -185,6 +193,20 @@
                 <input type="text" id="equation" value="x^2 + y^2" placeholder="e.g., x^2 + y^2">
             </div>
             <div class="input-group">
+                <label>X-axis Range:</label>
+                <div class="range-inputs">
+                    <input type="number" id="xMin" value="-10" placeholder="Min">
+                    <input type="number" id="xMax" value="10" placeholder="Max">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Y-axis Range:</label>
+                <div class="range-inputs">
+                    <input type="number" id="yMin" value="-10" placeholder="Min">
+                    <input type="number" id="yMax" value="10" placeholder="Max">
+                </div>
+            </div>
+            <div class="input-group">
                 <label for="startX">Starting X:</label>
                 <input type="number" id="startX" value="5">
             </div>
@@ -246,8 +268,12 @@
 
         function generateSurfaceData() {
             const equation = document.getElementById('equation').value;
-            const xValues = math.range(-10, 10, 0.5).toArray();
-            const yValues = math.range(-10, 10, 0.5).toArray();
+            const xMin = parseFloat(document.getElementById('xMin').value);
+            const xMax = parseFloat(document.getElementById('xMax').value);
+            const yMin = parseFloat(document.getElementById('yMin').value);
+            const yMax = parseFloat(document.getElementById('yMax').value);
+            const xValues = math.range(xMin, xMax, (xMax - xMin) / 40).toArray();
+            const yValues = math.range(yMin, yMax, (yMax - yMin) / 40).toArray();
             const z = [];
 
             for (let i = 0; i < yValues.length; i++) {
@@ -272,7 +298,7 @@
             updateStatus('running');
 
             try {
-                const response = await fetch('https://automaticdifferentiation-backend.up.railway.app/', {
+                const response = await fetch('https://automaticdifferentiation-production.up.railway.app/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ equation, startX, startY, learningRate, steps, optimizer })
@@ -318,6 +344,11 @@
 
         function initializePlots() {
             const { x, y, z } = generateSurfaceData();
+            const xMin = parseFloat(document.getElementById('xMin').value);
+            const xMax = parseFloat(document.getElementById('xMax').value);
+            const yMin = parseFloat(document.getElementById('yMin').value);
+            const yMax = parseFloat(document.getElementById('yMax').value);
+
 
             // 3D Surface Plot
             const surface = {
@@ -353,7 +384,9 @@
                         up: { x: 0, y: 0, z: 1 },
                         center: { x: 0, y: 0, z: 0 },
                         eye: { x: 1.5, y: 1.5, z: 1.5 }
-                    }
+                    },
+                    xaxis: { range: [xMin, xMax] },
+                    yaxis: { range: [yMin, yMax] }
                 },
                 margin: { l: 0, r: 0, t: 30, b: 0 }
             };
@@ -381,8 +414,8 @@
 
             const contourLayout = {
                 title: 'Contour Plot',
-                xaxis: { range: [-10, 10] },
-                yaxis: { range: [-10, 10] },
+                xaxis: { range: [xMin, xMax] },
+                yaxis: { range: [yMin, yMax] },
                 margin: { l: 50, r: 50, t: 30, b: 50 }
             };
 
