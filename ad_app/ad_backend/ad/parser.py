@@ -1,5 +1,5 @@
 import re
-from var import Var, FUNC, CONSTANT, MATH_FUNC, CONSTANT_, PRECEDENCE
+from .var import Var, FUNC, CONSTANT, MATH_FUNC, CONSTANT_, PRECEDENCE
 from utils import binop, tokenize
 
 class Parser:
