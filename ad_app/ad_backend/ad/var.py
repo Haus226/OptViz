@@ -8,7 +8,7 @@ CONSTANT = r'pi|\be\b'
 PRECEDENCE = {'^': 4, '*': 3, '/': 3, '+': 2, '-': 2, }
 CONSTANT_ = {"pi": np.pi, "e": np.e}
 MATH_FUNC = {
-    'log': [np.log, lambda x: 1.0 / x],
+    'ln': [np.log, lambda x: 1.0 / x],
     'exp': [np.exp, np.exp],
     'sin': [np.sin, np.cos],
     'cos': [np.cos, lambda x: -np.sin(x)],

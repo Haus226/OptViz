@@ -113,6 +113,23 @@ class ASTParser(Parser):
                     parents=args, 
                     type="func", info=function_exp, exp=f"{function_exp}(" + args[0].exp + ")")
         raise ValueError("Invalid AST node")
+    
+    def __evalFunc(self, ast, variables):
+        if ast['type'] in ['number', 'constant']:
+            return float(ast['value'])
+        elif ast['type'] == 'variable':
+            return variables[ast["var"]]
+        elif ast['type'] == 'binop':
+            left_val = self.__evalFunc(ast['left'], variables)
+            right_val = self.__evalFunc(ast['right'], variables)
+            op = ast["op"]
+            return binop(op, left_val, right_val)
+        elif ast['type'] == 'function_call':
+            function_exp = ast['func']
+            args = [self.__evaluateFunc(arg, variables) for arg in ast['args']]
+            return MATH_FUNC[function_exp][0](args[0])
+        raise ValueError("Invalid AST node")
+    
 
     def exp2func(self, exp) -> callable:
         tokens = self.parse(exp)
@@ -120,8 +137,12 @@ class ASTParser(Parser):
         def func(**kwargs):
             variables = {k: Var(v, exp=k, type="var", info=k) for k, v in kwargs.items()}
             return self.__evalVar(tokens, variables), variables
-        
-        return func
+            
+        def f(**kwargs):
+                variables = kwargs
+                return self.__evalFunc(tokens, variables)
+
+        return func, f
     
     def to_latex(self, exp) -> str:
         ast = self.parse(exp)
