@@ -1,5 +1,7 @@
 from typing import Union
 import numpy as np
+# from graphviz import Digraph
+# For visualization, make sure graphviz is installed and added into environment path
 
 TRIGO_FUNC = "exp|log|sin|cos|tan|arcsin|arccos|arctan|asin|acos|atan|cot|sec|cosec|csc|arcsec|arccosec|arcsc|arcot|asec|acosec|acsc|acot"
 HYPERBOLIC_FUNC = "sinh|cosh|tanh|arcsinh|arccosh|arctanh|asinh|acosh|atanh|coth|sech|cosech|csch|arcoth|arcsech|arccosech|arccsch|acoth|asech|acosech|acsch"
@@ -127,11 +129,35 @@ class Var:
         def build(node):
             if node not in nodes: # If node has not been seen before
                 nodes.add(node) # Store node
-                for parent, grad in node.parents: # For each parent of this node
+                for parent in node.parents: # For each parent of this node
                     edges.add((parent, node)) # Add a (parent, current node) edge
                     build(parent) # Recursively call build
         build(self)
         return nodes, edges
+    
+    # def draw_dag(self, filename="dag", rankdir='RL'):
+    #     assert rankdir in ['LR', 'TB', 'RL']
+    #     nodes, edges = self.trace()
+
+    #     dot = Digraph(format='png', graph_attr={'rankdir': rankdir})
+        
+    #     for n in nodes: 
+    #         label = "{f : %.3f} | {d : %.3f}" % (n.v, n.grad)
+    #         if n.type == "number":
+    #             label = "{v : %.3f}" % (n.v)
+    #         if n.type == "constant":
+    #             label = n.info
+    #         if n.type == "var":
+    #             label += f" | {n.info}"        
+    #         dot.node(name=str(id(n)), label=label, shape='record')
+    #         if n.type == "op" or n.type == "func":
+    #             dot.node(name=str(id(n)) + n.info, label=n.info)
+    #             dot.edge(str(id(n)), str(id(n)) + n.info)  
+
+    #     for n1, n2 in edges:
+    #         dot.edge(str(id(n2)) + n2.info, str(id(n1)))
+    #     dot.render(filename=filename, directory='').replace('\\', '/')
+    #     return dot
 
     # All the gradients below calculated as partial differentiate the equation respect to self and other.
     # Examples : 
@@ -184,4 +210,3 @@ class Var:
 
     def __repr__(self):
         return "Var(v=%.4f, grad=%.4f, exp=%s)" % (self.v, self.grad, self.exp)
-    

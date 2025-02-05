@@ -1,6 +1,8 @@
 import re
 from .var import Var, FUNC, CONSTANT, MATH_FUNC, CONSTANT_, PRECEDENCE
 from .utils import binop, tokenize
+# from graphviz import Digraph
+# For visualization, make sure graphviz is installed and added into environment path
 
 class Parser:
 
@@ -41,7 +43,6 @@ class Parser:
     # For debug purpose
     def postfix2tree(self, exp) -> dict:
         tokens = self.parse(exp)
-        """Convert postfix tokens to AST."""
         stack = []
         
         for token in tokens:
@@ -49,7 +50,7 @@ class Parser:
                 stack.append({'type': 'number', 'value': float(token)})
             elif re.match(CONSTANT, token.lower()):
                 stack.append({
-                    'type': 'constant', 
+                    'type': 'constant',
                     'value': CONSTANT_[token.lower()],
                     'cons_name': token.lower()
                 })
@@ -65,22 +66,18 @@ class Parser:
             elif re.match(r'[-+*/^]', token):
                 right = stack.pop()
                 left = stack.pop()
-                stack.append({
+                node = {
                     'type': 'binop',
                     'op': token,
                     'left': left,
                     'right': right
-                })
-                
+                }
+                stack.append(node)
         return stack[0]
     
     def print_tree(self, tree: dict, indent="", is_root=True, is_last=True) -> str:
-        """Convert AST to string visualization."""
-        # Branch characters
         
-        branch = "    ROOT\n    " if is_root else ("└── " if is_last else "├── ")
-        
-        # Get node representation based on type
+        branch = "    ROOT\n    " if is_root else ("└── " if is_last else "├── ")        
         if tree['type'] == 'number':
             node = f"NUM({tree['value']})"
         elif tree['type'] == 'constant':
@@ -91,7 +88,6 @@ class Parser:
             node = f"FUNC({tree['func']})"
         else:
             node = f"OP({tree['op']})"
-        
         result = indent + branch + node + "\n"
         
         # Handle children
@@ -100,12 +96,39 @@ class Parser:
         if tree['type'] == 'function_call':
             args = tree['args']
             for i, arg in enumerate(args):
-                result += self.tree2str(arg, next_indent, False, i == len(args)-1)
+                result += self.print_tree(arg, next_indent, False, i == len(args)-1)
         elif tree['type'] == 'binop':
-            result += self.tree2str(tree['left'], next_indent, False, False)
-            result += self.tree2str(tree['right'], next_indent, False, True)
+            result += self.print_tree(tree['left'], next_indent, False, False)
+            result += self.print_tree(tree['right'], next_indent, False, True)
             
         return result
+
+    # @staticmethod
+    # def draw_ast(ast, filename="ast"):
+    #     dot = Digraph(comment="Abstract Syntax Tree", format="png")
+
+    #     def traverse(node):
+    #         if node['type'] == "number":
+    #             dot.node(str(id(node)), label=str(node['type']) + "\n" + str(node["value"]))
+    #         elif node["type"] == "constant":
+    #             dot.node(str(id(node)), label=str(node['type']) + "\n" + str(node["cons_name"]))
+
+    #         elif node['type'] == "variable":
+    #             dot.node(str(id(node)), label=str(node['type']) + "\n" + str(node["var"]))
+    #         elif node['type'] == "function_call":
+    #             dot.node(str(id(node)), label=str(node['type']) + "\n" + str(node["func"]))
+    #             for arg in node["args"]:
+    #                 traverse(arg)
+    #                 dot.edge(str(id(node)), str(id(arg)))
+    #         elif node['type'] == 'binop':
+    #             dot.node(str(id(node)), label=str(node['type']) + '|' + str(node['op']), shape="record")
+    #             traverse(node['left'])
+    #             traverse(node['right'])
+    #             dot.edge(str(id(node)), str(id(node["left"])))
+    #             dot.edge(str(id(node)), str(id(node["right"])))
+
+    #     traverse(ast)
+    #     dot.render(filename)
 
     def __evalVar(self, tokens: list, vars):
         stack = []
@@ -164,11 +187,3 @@ class Parser:
 
 
         return func, f
-
-if __name__ == "__main__":
-    # exp = "sin(x+y)+(x-y)^2-1.5*x+2.5*y+1"
-    exp = "2*x^2-1.05*x^4+x^6/6+x*y+sin(y^2)"
-    p = Parser()
-    func, f = p.exp2func(exp)
-    tree = p.postfix2tree(exp)
-    print(p.tree2str(tree))
