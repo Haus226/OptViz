@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from ad.parser import SYParser, ASTParser
+from ad.parser import Parser
 from ad.grad import GradDescent, AdaGrad, RMSprop, Momentum, Adam, Nesterov, SignSGD, AdaDelta, NAdam, AdaBelief, AdamW, Lion, Tiger
 from flask_cors import CORS
 import numpy as np
@@ -13,7 +13,8 @@ CORS(app, resources={
         "allow_headers": ["Content-Type"]
     }
 })
-parser = SYParser()
+# CORS(app)
+parser = Parser()
 
 @app.route('/gd', methods=['POST'])
 def gradient_descent():
@@ -109,6 +110,7 @@ def meta_heuristic():
     
     # Parse equation
     func, f = parser.exp2func(equation)
+    
     var_dict = {'x': 0, 'y': 0}
 
     if optimizer == 'differential_evolution':
@@ -150,5 +152,5 @@ def meta_heuristic():
         'best_history': best_history,
     })
 
-# if __name__ == '__main__':
-#     app.run()
+if __name__ == '__main__':
+    app.run()

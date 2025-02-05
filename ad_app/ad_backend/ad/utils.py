@@ -1,5 +1,4 @@
 import re
-import numpy as np
 
 def binop(op, operand_1, operand_2):
     if op == "+":
@@ -14,6 +13,6 @@ def binop(op, operand_1, operand_2):
         return operand_1 ** operand_2
     
 def tokenize(expression: str):
-    pattern = r"\s*(-*\d*\.*\d+)|(\w+)|([-+*/^])|([(),])"
+    pattern = r"\s*(\d*\.*\d+)|(\w+)|([-+*/^])|([(),])"
     tokens = re.findall(pattern, expression)
     return [t[0] or t[1] or t[2] or t[3] for t in tokens]
