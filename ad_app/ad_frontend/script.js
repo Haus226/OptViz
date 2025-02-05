@@ -214,6 +214,7 @@ async function fetchData() {
 
     try {
         var url = 'https://automaticdifferentiation-backend.up.railway.app/';
+        // var url = "http://127.0.0.1:5000/";
         if (GRADIENT_OPTIMIZERS.has(optimizer)) {
             url += 'gd';
         } else {
@@ -276,7 +277,7 @@ function initializePlots() {
         x: x,
         y: y,
         z: z,
-        colorscale: 'Viridis',
+        colorscale: 'Rainbow',
         showscale: false
     };
 
@@ -285,7 +286,7 @@ function initializePlots() {
         x: x,
         y: y,
         z: z,
-        colorscale: 'Viridis',
+        colorscale: 'Rainbow',
         contours: {
             coloring: 'heatmap'
         },
