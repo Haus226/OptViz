@@ -6,14 +6,13 @@ import numpy as np
 from heu.algo import DE, PSO, HS
 
 app = Flask(__name__)
-# CORS(app, resources={
-#     r"/*": {  # Allow all routes
-#         "origins": ["https://automaticdifferentiation-frontend.up.railway.app"],
-#         "methods": ["GET", "POST", "OPTIONS"],
-#         "allow_headers": ["Content-Type"]
-#     }
-# })
-CORS(app)
+CORS(app, resources={
+    r"/*": {  # Allow all routes
+        "origins": ["https://automaticdifferentiation-frontend.up.railway.app"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 parser = SYParser()
 
 @app.route('/gd', methods=['POST'])
@@ -151,5 +150,5 @@ def meta_heuristic():
         'best_history': best_history,
     })
 
-if __name__ == '__main__':
-    app.run()
+# if __name__ == '__main__':
+#     app.run()
