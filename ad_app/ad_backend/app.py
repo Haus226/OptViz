@@ -8,7 +8,7 @@ from heu.algo import DE, PSO, HS
 app = Flask(__name__)
 CORS(app, resources={
     r"/*": {  # Allow all routes
-        "origins": ["https://automaticdifferentiation-frontend.up.railway.app"],
+        "origins": ["https://optviz.up.railway.app"],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }

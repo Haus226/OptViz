@@ -213,7 +213,7 @@ async function fetchData() {
     updateStatus('running');
 
     try {
-        var url = 'https://automaticdifferentiation-backend.up.railway.app/';
+        var url = 'https://optviz-226.up.railway.app/';
         // var url = "http://127.0.0.1:5000/";
         if (GRADIENT_OPTIMIZERS.has(optimizer)) {
             url += 'gd';
