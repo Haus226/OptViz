@@ -309,7 +309,6 @@ function initializePlots() {
                 marker: { size: 8, color: 'yellow', },
                 name: 'Population'
             },
-
             {
                 type: 'scatter3d',
                 mode: 'markers',
@@ -359,7 +358,7 @@ function initializePlots() {
                 y: [history.coords[0][1]],
                 z: [history.evaluated[0]],
                 marker: { size: 12, color: 'red', symbol: 'square' },
-                name: 'Latest Point'
+                name: 'Current Best Point'
             },
             {
                 type: 'scatter3d',
@@ -368,7 +367,7 @@ function initializePlots() {
                 y: [history.coords[0][1]],
                 z: [history.evaluated[0]],
                 marker: { size: 12, color: 'orange', symbol: 'diamond' },
-                name: 'Current Best Point'
+                name: 'Latest Point'
             }
         );
 
@@ -518,27 +517,27 @@ function animate() {
             x: [[currentBestPoint[0]]],
             y: [[currentBestPoint[1]]],
             z: [[currentBestValue]],
-            marker: { size: 12, color: 'orange', symbol: 'diamond' }
-        }, {}, [3]);  
+            marker: { size: 12, color: 'red', symbol: 'square' }
+        }, {}, [2]);  
 
         Plotly.update('contour-plot', {
             x: [[currentBestPoint[0]]],
             y: [[currentBestPoint[1]]],
-            marker: { size: 12, color: 'orange', symbol: 'diamond' }
-        }, {}, [3]);  
+            marker: { size: 12, color: 'red', symbol: 'star' }
+        }, {}, [2]);  
 
         // Update trace 3, the lastest point
         Plotly.update('surface-plot', {
             x: [[latestPoint[0]]],
             y: [[latestPoint[1]]],
             z: [[latestValue]],
-            marker: { size: 12, color: 'red', symbol: 'square', }
+            marker: { size: 12, color: 'orange', symbol: 'diamond', }
         }, {}, [3]);  
 
         Plotly.update('contour-plot', {
             x: [[latestPoint[0]]],
             y: [[latestPoint[1]]],
-            marker: { size: 12, color: 'red', symbol: 'star' }
+            marker: { size: 12, color: 'orange', symbol: 'diamond' }
         }, {}, [3]);  
 
         updateInfo(
