@@ -36,10 +36,10 @@ class DE(MetaHeuristic):
         self.cross_p = cross_p
 
     def step(self):
-        for idx in range(len(self.pop)):
+        for idx in range(self.pop_size):
             self.age[idx] -= 1
             idxs = [kdx for kdx in range(self.pop_size) if kdx != idx]
-            a, b, c = self.pop[np.random.choice(idxs, 3, replace = False)]
+            a, b, c = self.pop[np.random.choice(idxs, 3, replace = False)].copy()
             mutant = a + self.mut_1 * (b - c) + self.mut_2 * (self.optimal_coords - a)
             mutant = np.clip(mutant, self.lb, self.ub)
 
@@ -78,7 +78,7 @@ class HS(MetaHeuristic):
         r2_ = np.random.rand(self.pop_size, self.dimensions)
         r3_ = np.random.uniform(low=-1, high=1.001, size=(self.pop_size, self.dimensions))
 
-        for idx in range(len(self.pop)):
+        for idx in range(self.pop_size):
             self.age[idx] -= 1
             
             # Generate new harmony
@@ -143,3 +143,40 @@ class PSO(MetaHeuristic):
             self.optimal_coords = self.personal_best[best_idx].copy()
             self.optimal_evaluated = self.fitness[best_idx].copy()
 
+class ArtBC(MetaHeuristic):
+    def __init__(self, func, var_dict, bounds, pop_size, ttl):
+        super().__init__(func, var_dict, bounds, pop_size, ttl)
+
+    def bees(self, bee_type="employed"):
+        r = range(self.pop_size // 2) if bee_type == "employed" else range(self.pop_size // 2, self.pop_size)
+        probabilities = np.exp(-self.fitness) / np.sum(np.exp(-self.fitness)) if bee_type == "onlook" else None
+        for idx in r:
+            self.age[idx] -= 1
+            jdx = np.random.choice([i for i in range(self.pop_size) if i != idx], p=probabilities)
+            kdx = np.random.randint(0, self.dimensions)
+
+            trial = self.pop[idx].copy()
+            phi = np.random.uniform(-1, 1)
+            trial[kdx] = self.pop[idx][kdx] + phi * (self.pop[idx][kdx] - self.pop[jdx][kdx])
+            trial = np.clip(trial, self.lb, self.ub)
+            
+            f = self.evaluate(trial)
+            if f < self.fitness[idx]:
+                self.pop[idx] = trial
+                self.fitness[idx] = f
+                self.age[idx] = self.ttl
+                if f < self.optimal_evaluated:
+                    self.optimal_coords = trial.copy()
+                    self.optimal_evaluated = f
+            if self.age[idx] == -1:
+                self.pop[idx] = self.lb + np.random.uniform(0, 1) * (self.ub - self.lb)
+                self.fitness[idx] = self.evaluate(self.pop[idx])
+                self.age[idx] = self.ttl
+                if self.fitness[idx] < self.optimal_evaluated:
+                    self.optimal_coords = self.pop[idx].copy()
+                    self.optimal_evaluated = self.fitness[idx]
+
+    def step(self):
+        self.bees()
+        self.bees("onlook")
+        

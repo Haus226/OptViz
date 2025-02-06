@@ -16,7 +16,7 @@ const GRADIENT_OPTIMIZERS = new Set([
 ]);
 
 const META_HEURISTIC_OPTIMIZERS = new Set([
-    'differential_evolution', 'harmony_search', 'particle_swarm'
+    'differential_evolution', 'harmony_search', 'particle_swarm', 'artificial_bee'
 ]);
 
 function evaluateFunction(x, y, equation) {
@@ -72,6 +72,8 @@ function updateOptimizerControls() {
             document.querySelectorAll('.de-param').forEach(el => {
                 el.style.display = 'block';
             });
+            break;
+        case 'artificial_bee':
             break;
         case "particle_swarm":
             document.querySelectorAll('.pso-param').forEach(el => {
@@ -138,6 +140,8 @@ async function fetchData() {
             hyperparameters.mut_1 = parseFloat(document.getElementById('mut-1').value);
             hyperparameters.mut_2 = parseFloat(document.getElementById('mut-2').value);
             hyperparameters.cross_p = parseFloat(document.getElementById('cross-p').value);
+            break;
+        case 'artificial_bee':
             break;
         case 'particle_swarm':
             hyperparameters.inertia = parseFloat(document.getElementById('inertia').value);
