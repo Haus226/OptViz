@@ -150,10 +150,10 @@ class ArtBC(MetaHeuristic):
     def bees(self, bee_type="employed"):
         r = range(self.pop_size // 2) if bee_type == "employed" else range(self.pop_size // 2, self.pop_size)
         probabilities = np.exp(-self.fitness) / np.sum(np.exp(-self.fitness)) if bee_type == "onlook" else None
-        print(len(self.pop_size), len(probabilities))
         for idx in r:
+            mask = [i for i in range(self.pop_size) if i != idx]
             self.age[idx] -= 1
-            jdx = np.random.choice([i for i in range(self.pop_size) if i != idx], p=probabilities)
+            jdx = np.random.choice(mask, p=probabilities[mask] if bee_type == "onlook" else None)
             kdx = np.random.randint(0, self.dimensions)
 
             trial = self.pop[idx].copy()
