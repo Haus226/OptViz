@@ -145,7 +145,6 @@ class PSO(MetaHeuristic):
 
 class ArtBC(MetaHeuristic):
     def __init__(self, func, var_dict, bounds, pop_size, ttl):
-        pop_size = pop_size // 2
         super().__init__(func, var_dict, bounds, pop_size, ttl)
 
     def generate(self, idx):
