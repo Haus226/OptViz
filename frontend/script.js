@@ -388,7 +388,7 @@ function initializePlots() {
                 x: [history.coords[0][0]],
                 y: [history.coords[0][1]],
                 marker: { size: 12, color: 'red', symbol: 'star' },
-                name: 'Latest Point'
+                name: 'Current Best Point'
             },
             {
                 type: 'scatter',
@@ -396,7 +396,7 @@ function initializePlots() {
                 x: [history.coords[0][0]],
                 y: [history.coords[0][1]],
                 marker: { size: 12, color: 'orange', symbol: 'diamond' },
-                name: 'Current Best Point'
+                name: 'Latest Point'
             }
         );
     }
@@ -513,21 +513,7 @@ function animate() {
             y: [currentCoords.map(c => c[1])]
         }, {}, [1]);  
 
-        // Update trace 2, the lastest point
-        Plotly.update('surface-plot', {
-            x: [[latestPoint[0]]],
-            y: [[latestPoint[1]]],
-            z: [[latestValue]],
-            marker: { size: 12, color: 'red', symbol: 'square', }
-        }, {}, [2]);  
-
-        Plotly.update('contour-plot', {
-            x: [[latestPoint[0]]],
-            y: [[latestPoint[1]]],
-            marker: { size: 12, color: 'red', symbol: 'star' }
-        }, {}, [2]);  
-
-        // Update trace 3, the current best point
+        // Update trace 2, the current best point
         Plotly.update('surface-plot', {
             x: [[currentBestPoint[0]]],
             y: [[currentBestPoint[1]]],
@@ -539,6 +525,20 @@ function animate() {
             x: [[currentBestPoint[0]]],
             y: [[currentBestPoint[1]]],
             marker: { size: 12, color: 'orange', symbol: 'diamond' }
+        }, {}, [3]);  
+
+        // Update trace 3, the lastest point
+        Plotly.update('surface-plot', {
+            x: [[latestPoint[0]]],
+            y: [[latestPoint[1]]],
+            z: [[latestValue]],
+            marker: { size: 12, color: 'red', symbol: 'square', }
+        }, {}, [3]);  
+
+        Plotly.update('contour-plot', {
+            x: [[latestPoint[0]]],
+            y: [[latestPoint[1]]],
+            marker: { size: 12, color: 'red', symbol: 'star' }
         }, {}, [3]);  
 
         updateInfo(
