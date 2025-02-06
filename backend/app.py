@@ -3,7 +3,7 @@ from ad.parser import Parser
 from ad.grad import GradDescent, AdaGrad, RMSprop, Momentum, Adam, Nesterov, SignSGD, AdaDelta, NAdam, AdaBelief, AdamW, Lion, Tiger
 from flask_cors import CORS
 import numpy as np
-from heu.algo import DE, PSO, HS
+from heu.algo import DE, PSO, HS, ArtBC
 
 app = Flask(__name__)
 CORS(app, resources={
@@ -129,6 +129,8 @@ def meta_heuristic():
         cognitive = float(data.get('cognitive', 1.5))
         social = float(data.get('social', 1.5))
         optimizer = PSO(f, var_dict, bounds, pop_size, ttl, inertia, cognitive, social)
+    elif optimizer == 'artificial_bee':
+        optimizer = ArtBC(f, var_dict, bounds, pop_size, ttl)
     else:
         return jsonify({'error': 'Invalid algorithm'}), 400
 
